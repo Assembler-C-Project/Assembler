@@ -21,9 +21,8 @@ int functions(int command, char *operands)
     second_value = caching_methods_values[3];
     num_of_ops = caching_methods_values[4];
 
-    printf("%d %d\n", first_meth, second_meth);
     err_num = 0;
-    err_msg=-1;
+    err_msg = -1;
     if (!err_num && num_of_ops != 2 && ((command >= MOV && command <= SUB) || command == LEA))
     {
         err_msg = ERR_2_OPS;
@@ -71,31 +70,54 @@ int functions(int command, char *operands)
             {
                 s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
             }
-            else if (second_meth == 3)
+            else if (second_meth == 3 || second_meth == 1)
             {
                 t_binaryint |= (second_value << 2);
-                t_binaryint |= 2;
+                if (second_meth == 3)
+                {
+                    t_binaryint |= 2;
+                }
             }
         }
-        else if (first_meth == 3)
+        else if (first_meth == 3 || first_meth == 1)
         {
             s_binaryint |= (first_value << 2);
-            s_binaryint |= 2;
+            if (first_meth == 3)
+            {
+                s_binaryint |= 2;
+            }
             if (second_meth == 5)
             {
                 t_binaryint |= (second_value << DESTINATION_REG_SHIFT);
             }
-            else if (second_meth == 3)
+            else if (second_meth == 3 || second_meth == 1)
             {
                 t_binaryint |= (second_value << 2);
-                t_binaryint |= 2;
+                if (second_meth == 3)
+                {
+                    t_binaryint |= 2;
+                }
             }
         }
-        
-        /*need to add mapping 0,(1,3,5) and 1,(1,3,5) and (3,5),1 */
+        if (!first_op){
+             if (second_meth == 5)
+            {
+                s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
+            }
+            else if (second_meth == 3 || second_meth == 1)
+            {
+                s_binaryint |= (second_value << 2);
+                if (second_meth == 3)
+                {
+                    s_binaryint |= 2;
+                }
+            }
+        }
+
     }
+
+    printf("The binaries are: %d %d %d\n", f_binaryint, s_binaryint, t_binaryint);
     return err_msg;
-    printf("the binaries are: %d %d %d\n", f_binaryint, s_binaryint, t_binaryint);
 }
 
 /* Caching method and operand divider function*/
@@ -203,6 +225,6 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
 }
 int search_data(char *operand)
 {
-    return 125;
+    return 117;
     /*-returns a value from the data sheet*/
 }

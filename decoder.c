@@ -30,10 +30,10 @@ void decoder(char **lines, int line_num)
         printf("ERR: Wrong command found!\n");
     }
 }
-/*
+
 int main()
 {
-    char *lines[2] = {"inc 5,s", "stop "};
+    char *lines[2] = {"bne END", "  mov @r3,LENGTH "};
 
     printf("starting\n");
 
@@ -42,4 +42,3 @@ int main()
 
     return 0;
 }
-*/
