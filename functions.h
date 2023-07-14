@@ -16,10 +16,27 @@
 
 #define SOURCE_REG_SHIFT 7
 #define DESTINATION_REG_SHIFT 2
+enum error_code
+{
+    ERR_2_OPS,
+    ERR_1_OP,
+    ERR_0_OP,
+    ERR_DEST_TYPE,
+    ERR_SRC_TYPE
+};
+struct
+{
+    int num;
+    char *message;
 
+} error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
+             {ERR_1_OP, "Expected 1 operand\n"},
+             {ERR_0_OP, "Command doesn't take operands\n"},
+             {ERR_DEST_TYPE, "Destination operand type error\n"},
+             {ERR_SRC_TYPE, "Source operand type error\n"}};
 int *method_OpDivider(char *operands, char **first_op, char **second_op);
 int search_data(char *operand);
-void functions(int command, char *operands);
+int functions(int command, char *operands);
 
 struct
 {

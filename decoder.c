@@ -1,10 +1,12 @@
 #include "decoder.h"
 
-void decoder(char line[])
+void decoder(char **lines, int line_num)
 {
-
+    char line[30];
     int i;
     char *label, *cmd, *operands;
+    int err_msg;
+    strcpy(line, lines[line_num]);
     divider(line, &label, &cmd, &operands);
     i = 0;
     while (i < 16)
@@ -17,24 +19,27 @@ void decoder(char line[])
     }
     if (i != 16)
     {
-        functions(cmds[i].value, operands);
+        err_msg = functions(cmds[i].value, operands);
+        if (err_msg != -1)
+        {
+            printf("Error in line %d: %s\n", line_num, error[err_msg].message);
+        }
     }
     else
     {
         printf("ERR: Wrong command found!\n");
     }
 }
-
+/*
 int main()
 {
-    char line[2][30];
+    char *lines[2] = {"inc 5,s", "stop "};
 
-    strcpy((line[0]), "inc K");
-    strcpy((line[1]), "sub @r1, @r4");
     printf("starting\n");
 
-    decoder(line[0]);
-    decoder(line[1]);
+    decoder(lines, 0);
+    decoder(lines, 1);
 
     return 0;
 }
+*/

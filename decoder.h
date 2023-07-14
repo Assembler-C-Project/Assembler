@@ -1,6 +1,6 @@
 #include "functions.c"
 
-void decoder(char line[]);
+void decoder(char **lines,int line_num);
 
 struct
 {

@@ -2,93 +2,99 @@
 /*caching_methods_values=[ 0:first_operand_meth   1:first_operand_value,
                            2:second_operand_meth  3:second_operand_value]*/
 
-void functions(int command, char *operands)
+int functions(int command, char *operands)
 {
     int *caching_methods_values;
     int err_msg;
+    int err_num;
     char *first_op;
     char *second_op;
     int f_binaryint;
     int s_binaryint;
     int t_binaryint;
+    int first_meth, second_meth, first_value, second_value, num_of_ops;
 
     caching_methods_values = method_OpDivider(operands, &first_op, &second_op);
+    first_meth = caching_methods_values[0];
+    first_value = caching_methods_values[1];
+    second_meth = caching_methods_values[2];
+    second_value = caching_methods_values[3];
+    num_of_ops = caching_methods_values[4];
 
-    printf("%d %d\n", caching_methods_values[0], caching_methods_values[2]);
-    err_msg = 0;
+    printf("%d %d\n", first_meth, second_meth);
+    err_num = 0;
+    err_msg=-1;
+    if (!err_num && num_of_ops != 2 && ((command >= MOV && command <= SUB) || command == LEA))
+    {
+        err_msg = ERR_2_OPS;
+        err_num++;
+    }
+    if (!err_num && num_of_ops != 1 && ((command >= INC && command <= JSR) || command == NOT || command == CLR))
+    {
+        err_msg = ERR_1_OP;
+        err_num++;
+    }
+    if (!err_num && num_of_ops != 0 && (command == STOP || command == RTS))
 
-    if ((caching_methods_values[2] == 1) && (command != CMP && command != PRN && command != STOP && command != RTS))
     {
-        printf("Destination operand type error\n");
-        err_msg = 1;
-    }
-    if ((caching_methods_values[2]) && (command == RTS || command == STOP))
-    {
-        printf("Unexpected destination operand\n");
-        err_msg = 1;
+        err_msg = ERR_0_OP;
+        err_num++;
     }
 
-    if ((caching_methods_values[0]) && (command != MOV && command != CMP && command != ADD && command != SUB && command != LEA))
+    if (!err_num && (second_meth == 1) && (command != CMP && command != PRN && command != STOP && command != RTS))
     {
-        printf("Unexpected source operand\n");
-        err_msg = 1;
+
+        err_msg = ERR_DEST_TYPE;
+        err_num++;
     }
-    if (caching_methods_values[0] != 3 && command == LEA)
+
+    if (!err_num && first_meth != 3 && command == LEA)
     {
-        printf("Source operand type error\n");
-        err_msg = 1;
+        err_msg = ERR_SRC_TYPE;
+        err_num++;
     }
-    if (!caching_methods_values[2] && (command != RTS && command != STOP))
-    {
-        printf("Missed destination operand");
-        err_msg = 1;
-    }
-    if (!caching_methods_values[0] && (command == MOV || command == CMP || command == ADD || command == SUB || command == LEA))
-    {
-        printf("Missed source operand");
-        err_msg = 1;
-    }
+
     f_binaryint = 0;
     s_binaryint = 0;
     t_binaryint = 0;
 
-    if (!err_msg)
+    if (!err_num)
     {
-        f_binaryint |= (caching_methods_values[0] << SOURCE_OPERAND_SHIFT);
+        f_binaryint |= (first_meth << SOURCE_OPERAND_SHIFT);
         f_binaryint |= (command << OPCODE_SHIFT);
-        f_binaryint |= (caching_methods_values[2] << DESTINATION_OPERAND_SHIFT);
+        f_binaryint |= (second_meth << DESTINATION_OPERAND_SHIFT);
 
-        if (caching_methods_values[0] == 5)
+        if (first_meth == 5)
         {
-            s_binaryint |= (caching_methods_values[1] << SOURCE_REG_SHIFT);
-            if (caching_methods_values[2] == 5)
+            s_binaryint |= (first_value << SOURCE_REG_SHIFT);
+            if (second_meth == 5)
             {
-                s_binaryint |= (caching_methods_values[3] << DESTINATION_REG_SHIFT);
+                s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
             }
-            else if (caching_methods_values[2] == 3)
+            else if (second_meth == 3)
             {
-                t_binaryint |= (caching_methods_values[3] << 2);
+                t_binaryint |= (second_value << 2);
                 t_binaryint |= 2;
             }
         }
-        else if (caching_methods_values[0] == 3)
+        else if (first_meth == 3)
         {
-            s_binaryint |= (caching_methods_values[1] << 2);
+            s_binaryint |= (first_value << 2);
             s_binaryint |= 2;
-            if (caching_methods_values[2] == 5)
+            if (second_meth == 5)
             {
-                t_binaryint |= (caching_methods_values[3] << DESTINATION_REG_SHIFT);
+                t_binaryint |= (second_value << DESTINATION_REG_SHIFT);
             }
-            else if (caching_methods_values[2] == 3)
+            else if (second_meth == 3)
             {
-                t_binaryint |= (caching_methods_values[3] << 2);
+                t_binaryint |= (second_value << 2);
                 t_binaryint |= 2;
             }
         }
+        
         /*need to add mapping 0,(1,3,5) and 1,(1,3,5) and (3,5),1 */
     }
-    free(caching_methods_values);
-
+    return err_msg;
     printf("the binaries are: %d %d %d\n", f_binaryint, s_binaryint, t_binaryint);
 }
 
@@ -103,9 +109,9 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
     int i;
     int first_value;
     int second_value;
-
-    result = malloc(sizeof(int) * 4);
-
+    int num_of_ops;
+    result = malloc(sizeof(int) * 5);
+    num_of_ops = 0;
     first_meth = second_meth = first_value = second_value = 0;
 
     /* Divider*/
@@ -124,7 +130,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
     second_meth = 0;
     if (*first_op)
     {
-
+        num_of_ops++;
         first_value = strtol(*first_op, &err, 10);
         if (!strncmp((*first_op), "@r", 2))
         {
@@ -157,7 +163,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
 
     if (*second_op)
     {
-
+        num_of_ops++;
         second_value = strtol(*second_op, &err, 10);
         if (!strncmp((*second_op), "@r", 2))
         {
@@ -192,7 +198,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
     result[1] = first_value;
     result[2] = second_meth;
     result[3] = second_value;
-
+    result[4] = num_of_ops;
     return result;
 }
 int search_data(char *operand)
