@@ -5,25 +5,45 @@ void divider(char *line, char **label, char **instruction, char **operands)
     char *rest;
     *label = strtok(line, ":");
     rest = strtok(NULL, "");
-    if (rest == NULL)
+
+    if (rest == NULL || strlen(rest) == 0)
     {
-        rest = *label;
+        if (*label != NULL)
+            rest = *label;
+        else
+            rest = "";
         *label = NULL;
     }
-    *instruction = strtok(rest, " ");
-    *operands = strtok(NULL, "");
-    remove_spaces( *operands);
-    remove_spaces(*instruction);
 
+    if (strlen(rest) > 0)
+    {
+        *instruction = strtok(rest, " ");
+        *operands = strtok(NULL, "");
+        if (*operands != NULL)
+        {
+            remove_spaces(*operands);
+        }
+        if (*instruction != NULL)
+        {
+            remove_spaces(*instruction);
+        }
+    }
+    else
+    {
+        *instruction = NULL;
+        *operands = NULL;
+    }
 }
-void remove_spaces(char *str){
+void remove_spaces(char *str)
+{
 
-  
     int i;
     int count;
     count = 0;
-    for (i = 0; str[i]; i++) {
-        if (str[i] != ' ') {
+    for (i = 0; str[i]; i++)
+    {
+        if (str[i] != ' ')
+        {
             str[count++] = str[i];
         }
     }

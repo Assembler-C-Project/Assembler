@@ -6,7 +6,6 @@ void decoder(char line[])
     int i;
     char *label, *cmd, *operands;
     divider(line, &label, &cmd, &operands);
-
     i = 0;
     while (i < 16)
     {
@@ -18,22 +17,24 @@ void decoder(char line[])
     }
     if (i != 16)
     {
-        cmds[i].func(operands);
+        functions(cmds[i].value, operands);
     }
     else
     {
-        printf("Command not found!\n");
+        printf("ERR: Wrong command found!\n");
     }
 }
 
-
-/*
 int main()
 {
-    char line[] = "main: cmp  @r4   , @r2    ";
+    char line[2][30];
+
+    strcpy((line[0]), "inc K");
+    strcpy((line[1]), "sub @r1, @r4");
     printf("starting\n");
-    decoder(line);
+
+    decoder(line[0]);
+    decoder(line[1]);
 
     return 0;
 }
-*/
