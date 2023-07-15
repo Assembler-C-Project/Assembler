@@ -1,3 +1,4 @@
-source_file.txt
-output_file.txt
-PreAssem
+/source_file.txt
+/output_file.txt
+/PreAssem
+/decoder.o
