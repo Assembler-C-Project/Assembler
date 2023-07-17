@@ -229,32 +229,28 @@ int search_data(char *operand)
     /*-returns a value from the data sheet*/
 }
 
-char* convertToBase64(short decimalNumber) {
+void convertToBase64(short decimalNumber, char *base64Chars) {
     char base64Map[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    char base64Chars[3];
 
     /* Make sure the decimalNumber is 12 bits.*/
     if (decimalNumber < 0 || decimalNumber > 4095) {
         printf("The decimalNumber is not a 12 bits number.\n");
-        return;
+        exit(1);
     }
     
     /* Extract the first and second 6 bits and convert to corresponding base64 characters. */
     base64Chars[0] = base64Map[(decimalNumber & 0xFC0) >> 6];
     base64Chars[1] = base64Map[decimalNumber & 0x3F];
     base64Chars[2] = '\0';
-
-    return base64Chars;
 }
 
-char* convertToBinary(short decimalNumber) 
+void convertToBinary(short decimalNumber, char *binary) 
 {
-    char binary[13];
     int i;
     /* Make sure the decimalNumber is 12 bits. */
     if (decimalNumber < 0 || decimalNumber > 4095) {
         printf("The decimalNumber is not a 12 bits number.\n");
-        return;
+        exit(1);
     }
 
     binary[12] = '\0';
@@ -263,6 +259,4 @@ char* convertToBinary(short decimalNumber)
     for (i = 11; i >= 0; --i) {
         binary[11 - i] = ((decimalNumber & (1 << i)) != 0) ? '1' : '0';
     }
-
-    return binary;
 }

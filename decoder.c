@@ -1,12 +1,10 @@
 #include "decoder.h"
 
-void decoder(char **lines, int line_num)
+void decoder(char *line, int line_num)
 {
-    char line[30];
     int i;
     char *label, *cmd, *operands;
     int err_msg;
-    strcpy(line, lines[line_num]);
     divider(line, &label, &cmd, &operands);
     i = 0;
     while (i < 16)
@@ -33,12 +31,23 @@ void decoder(char **lines, int line_num)
 
 int main()
 {
-    char *lines[2] = {"bne END", "  mov @r3,LENGTH "};
+    FILE* sourceFile = fopen("output_file.txt", "r");
+    char line[MAX_LINE_LENGTH];
+    int i = 0;
+
+    /* Check if the source file opened successfully */
+    if (sourceFile == NULL) {
+        printf("Error opening source file.\n");
+        return 1;
+    }
 
     printf("starting\n");
 
-    decoder(lines, 0);
-    decoder(lines, 1);
+    while(fgets(line, MAX_LINE_LENGTH, sourceFile) != NULL)
+    {
+        decoder(line, i);
+        i++;
+    }
 
     return 0;
 }

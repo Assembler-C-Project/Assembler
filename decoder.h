@@ -1,6 +1,8 @@
 #include "functions.c"
 
-void decoder(char **lines,int line_num);
+void decoder(char *line,int line_num);
+#define MAX_LINE_LENGTH 80
+
 
 struct
 {

@@ -37,6 +37,8 @@ struct
 int *method_OpDivider(char *operands, char **first_op, char **second_op);
 int search_data(char *operand);
 int functions(int command, char *operands);
+void convertToBase64(short decimalNumber, char *base64Chars);
+void convertToBinary(short decimalNumber, char *binary);
 
 struct
 {
