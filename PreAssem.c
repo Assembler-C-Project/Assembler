@@ -1,17 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include"PreAssem.h"
 
-#define MAX_LINE_LENGTH 80
-#define MAX_MACRO_COUNT 100
-#define MAX_MACRO_LINES 100
-
-/* Define a structure for a macro */
-typedef struct {
-    char name[MAX_LINE_LENGTH];
-    char lines[MAX_MACRO_LINES][MAX_LINE_LENGTH];
-    int lineCount;
-} Macro;
 
 /* Function to replace tabs with spaces in a string */
 void replaceTabsWithSpaces(char* str) {
