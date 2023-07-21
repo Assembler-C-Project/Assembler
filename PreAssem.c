@@ -82,11 +82,10 @@ void unfoldMacros(FILE* sourceFile, FILE* outputFile, Macro* macroTable[], int* 
     }
 }
 
-/* Main function */
-int main() {
+void RunPreAssem(FILE* sourceFile, FILE* outputFile)
+{
+    /* Initialize all variables needed for running the Pre Assembler*/
     Macro* macroTable[MAX_MACRO_COUNT];
-    FILE* sourceFile = fopen("source_file.txt", "r");
-    FILE* outputFile = fopen("output_file.txt", "w");
     int macroCount = 0;
     int i;
 
@@ -94,29 +93,12 @@ int main() {
     for (i = 0; i < MAX_MACRO_COUNT; i++) {
         macroTable[i] = NULL;
     }
-
-    /* Check if the source file opened successfully */
-    if (sourceFile == NULL) {
-        printf("Error opening source file.\n");
-        return 1;
-    }
-
-    /* Check if the output file opened successfully */
-    if (outputFile == NULL) {
-        printf("Error opening output file.\n");
-        fclose(sourceFile);
-        return 1;
-    }
-
     /* Expand the macros in the source file and write to the output file */
     unfoldMacros(sourceFile, outputFile, macroTable, &macroCount);
+    /* Close the original source file */
     fclose(sourceFile);
-    fclose(outputFile);
-
     /* Free the memory allocated for the macros */
     for (i = 0; i < macroCount; i++) {
         free(macroTable[i]);
     }
-
-    return 0;
 }

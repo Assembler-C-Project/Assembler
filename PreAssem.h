@@ -19,4 +19,5 @@ void replaceTabsWithSpaces(char* str);
 void saveMacro(FILE* file, char* macroName, Macro* macroTable[], int* macroCount);
 /* Function to expand the macros in the source file */
 void unfoldMacros(FILE* sourceFile, FILE* outputFile, Macro* macroTable[], int* macroCount);
-
+/* Function for running PreAssem from main */
+void RunPreAssem(FILE* sourceFile, FILE* outputFile);
