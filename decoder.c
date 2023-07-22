@@ -1,15 +1,24 @@
 #include "decoder.h"
 
+cmd cmds[] =
+    {{"mov", MOV}, {"cmp", CMP}, {"add", ADD}, 
+    {"sub", SUB}, {"not", NOT}, {"clr", CLR}, 
+    {"lea", LEA}, {"inc", INC}, {"dec", DEC}, 
+    {"jmp", JMP}, {"bne", BNE}, {"red", RED}, 
+    {"prn", PRN}, {"jsr", JSR}, {"rts", RTS}, 
+    {"stop", STOP}};
+
+
 void decoder(char *line, int line_num)
 {
     int i;
-    char *label, *cmd, *operands;
+    char *label, *comd, *operands;
     int err_msg;
-    divider(line, &label, &cmd, &operands);
+    divider(line, &label, &comd, &operands);
     i = 0;
     while (i < 16)
     {
-        if (!strcmp(cmd, cmds[i].name))
+        if (!strcmp(comd, cmds[i].name))
         {
             break;
         }
@@ -29,25 +38,15 @@ void decoder(char *line, int line_num)
     }
 }
 
-int main()
+void RunDecoder(FILE *SourceFile)
 {
-    FILE* sourceFile = fopen("output_file.txt", "r");
     char line[MAX_LINE_LENGTH];
     int i = 0;
-
-    /* Check if the source file opened successfully */
-    if (sourceFile == NULL) {
-        printf("Error opening source file.\n");
-        return 1;
-    }
-
     printf("starting\n");
-
-    while(fgets(line, MAX_LINE_LENGTH, sourceFile) != NULL)
+    while(fgets(line, MAX_LINE_LENGTH, SourceFile) != NULL)
     {
+        printf("%s", line);
         decoder(line, i);
         i++;
     }
-
-    return 0;
 }

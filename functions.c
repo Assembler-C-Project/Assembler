@@ -2,6 +2,25 @@
 /*caching_methods_values=[ 0:first_operand_meth   1:first_operand_value,
                            2:second_operand_meth  3:second_operand_value]*/
 
+ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
+             {ERR_1_OP, "Expected 1 operand\n"},
+             {ERR_0_OP, "Command doesn't take operands\n"},
+             {ERR_DEST_TYPE, "Destination operand type error\n"},
+             {ERR_SRC_TYPE, "Source operand type error\n"}};
+
+
+RegsType regs[] = {
+    {"r0", 0},
+    {"r1", 1},
+    {"r2", 2},
+    {"r3", 3},
+    {"r4", 4},
+    {"r5", 5},
+    {"r6", 6},
+    {"r7", 7}
+
+};
+
 int functions(int command, char *operands)
 {
     int *caching_methods_values;

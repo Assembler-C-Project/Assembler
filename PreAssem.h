@@ -1,3 +1,6 @@
+#ifndef PREASSEM_H
+#define PREASSEM_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +10,7 @@
 #define MAX_MACRO_LINES 100
 
 /* Define a structure for a macro */
-typedef struct {
+typedef struct Macro {
     char name[MAX_LINE_LENGTH];
     char lines[MAX_MACRO_LINES][MAX_LINE_LENGTH];
     int lineCount;
@@ -21,3 +24,5 @@ void saveMacro(FILE* file, char* macroName, Macro* macroTable[], int* macroCount
 void unfoldMacros(FILE* sourceFile, FILE* outputFile, Macro* macroTable[], int* macroCount);
 /* Function for running PreAssem from main */
 void RunPreAssem(FILE* sourceFile, FILE* outputFile);
+
+#endif

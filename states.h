@@ -1,7 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#ifndef STATES_H
+#define STATES_H
+
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
 
 enum opcode
 {
@@ -30,3 +32,5 @@ enum directivecode
     ENTRY,
     EXTERN
 };
+
+#endif

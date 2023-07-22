@@ -1,12 +1,19 @@
-#include "functions.c"
-
-void decoder(char *line,int line_num);
+#ifndef DECODER_H
+#define DECODER_H
 #define MAX_LINE_LENGTH 80
 
+#include "functions.h"
+#include "Interpreter.h"
 
-struct
+typedef struct cmd
 {
     char *name;
     int value;
-} cmds[] = {
-    {"mov", MOV}, {"cmp", CMP}, {"add", ADD}, {"sub", SUB}, {"not", NOT}, {"clr", CLR}, {"lea", LEA}, {"inc", INC}, {"dec", DEC}, {"jmp", JMP}, {"bne", BNE}, {"red", RED}, {"prn", PRN}, {"jsr", JSR}, {"rts", RTS}, {"stop", STOP}};
+}cmd;
+
+extern cmd cmds[16];
+
+void decoder(char *line,int line_num);
+void RunDecoder(FILE *SourceFile);
+
+#endif

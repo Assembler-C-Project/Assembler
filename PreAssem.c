@@ -1,6 +1,5 @@
 #include"PreAssem.h"
 
-
 /* Function to replace tabs with spaces in a string */
 void replaceTabsWithSpaces(char* str) {
     int i;
@@ -97,6 +96,8 @@ void RunPreAssem(FILE* sourceFile, FILE* outputFile)
     unfoldMacros(sourceFile, outputFile, macroTable, &macroCount);
     /* Close the original source file */
     fclose(sourceFile);
+    /* Close the output file */
+    fclose(outputFile);
     /* Free the memory allocated for the macros */
     for (i = 0; i < macroCount; i++) {
         free(macroTable[i]);
