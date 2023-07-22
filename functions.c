@@ -32,6 +32,10 @@ int functions(int command, char *operands)
     int s_binaryint;
     int t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
+    char* f_base64Chars = malloc(3 * sizeof(char));
+    char* s_base64Chars = malloc(3 * sizeof(char));
+    char* t_base64Chars = malloc(3 * sizeof(char));
+
 
     caching_methods_values = method_OpDivider(operands, &first_op, &second_op);
     first_meth = caching_methods_values[0];
@@ -136,6 +140,11 @@ int functions(int command, char *operands)
     }
 
     printf("The binaries are: %d %d %d\n", f_binaryint, s_binaryint, t_binaryint);
+    convertToBase64(f_binaryint, f_base64Chars);
+    convertToBase64(s_binaryint, s_base64Chars);
+    convertToBase64(t_binaryint, t_base64Chars);
+    printf("The binaries are: %s %s %s\n", f_base64Chars, s_base64Chars, t_base64Chars);
+    
     return err_msg;
 }
 

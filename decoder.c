@@ -45,7 +45,6 @@ void RunDecoder(FILE *SourceFile)
     printf("starting\n");
     while(fgets(line, MAX_LINE_LENGTH, SourceFile) != NULL)
     {
-        printf("%s", line);
         decoder(line, i);
         i++;
     }
