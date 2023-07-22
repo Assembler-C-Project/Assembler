@@ -1,11 +1,13 @@
 #include "Interpreter.h"
+#include <string.h>
+#include <stdio.h>
 
 void divider(char *line, char **label, char **instruction, char **operands)
 {
     char *rest;
     *label = strtok(line, ":");
     rest = strtok(NULL, "");
-
+    
     if (rest == NULL || strlen(rest) == 0)
     {
         if (*label != NULL)
