@@ -1,6 +1,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
+#include <stdlib.h>
 #include "states.h"
 
 #define NUM_OF_REGS 8
@@ -47,5 +48,11 @@ int search_data(char *operand);
 int functions(int command, char *operands);
 void convertToBase64(short decimalNumber, char *base64Chars);
 void convertToBinary(short decimalNumber, char *binary);
+FILE* openEntFile(const char* name);
+void writeToEntFile(const char* filename, const char* line);
+void closeEntFile(const char* filename);
+FILE* openExtFile(const char* name);
+void writeToExtFile(const char* filename, const char* line);
+void closeExtFile(const char* filename);
 
 #endif

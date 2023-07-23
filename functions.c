@@ -288,3 +288,80 @@ void convertToBinary(short decimalNumber, char *binary)
         binary[11 - i] = ((decimalNumber & (1 << i)) != 0) ? '1' : '0';
     }
 }
+
+FILE* openEntFile(const char* name) 
+{
+    char *filename = strcat(name, ".ent");
+    FILE* file = fopen(filename, "r");
+    if (file) {
+        /* If the file exists, close it and reopen it in append mode */
+        fclose(file);
+        file = fopen(filename, "a");
+    } else {
+        /* If the file doesn't exist, open it in write mode to create it */
+        file = fopen(filename, "w");
+    }
+
+    return file;
+}
+
+void writeToEntFile(const char* filename, const char* line) 
+{
+    FILE* file = openEntFile(filename);
+
+    if (file) {
+        fprintf(file, "%s\n", line);
+        fclose(file);
+    } else {
+        printf("Failed to open the file.\n");
+    }
+}
+
+void closeEntFile(const char* filename) 
+{
+    FILE* file = fopen(filename, "r");
+
+    if (file != NULL) 
+    {
+        fclose(file);
+    }
+}
+
+FILE* openExtFile(const char* name) 
+{
+    char *filename = strcat(name, ".ext");
+    FILE* file = fopen(filename, "r");
+    if (file) {
+        /* If the file exists, close it and reopen it in append mode */
+        fclose(file);
+        file = fopen(filename, "a");
+    } else {
+        /* If the file doesn't exist, open it in write mode to create it */
+        file = fopen(filename, "w");
+    }
+
+    return file;
+}
+
+void writeToExtFile(const char* filename, const char* line) 
+{
+    FILE* file = openEntFile(filename);
+
+    if (file) {
+        fprintf(file, "%s\n", line);
+        fclose(file);
+    } else {
+        printf("Failed to open the file.\n");
+    }
+}
+
+void closeExtFile(const char* filename) 
+{
+    FILE* file = fopen(filename, "r");
+
+    if (file != NULL) 
+    {
+        fclose(file);
+    }
+}
+
