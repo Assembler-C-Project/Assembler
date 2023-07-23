@@ -2,6 +2,7 @@
 #define FUNCTIONS_H
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "states.h"
 
 #define NUM_OF_REGS 8
@@ -45,7 +46,7 @@ extern RegsType regs[8];
 
 int *method_OpDivider(char *operands, char **first_op, char **second_op);
 int search_data(char *operand);
-int functions(int command, char *operands);
+int functions(int command, char *operands, FILE* objectFile);
 void convertToBase64(short decimalNumber, char *base64Chars);
 void convertToBinary(short decimalNumber, char *binary);
 FILE* openEntFile(const char* name);

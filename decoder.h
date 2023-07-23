@@ -13,7 +13,7 @@ typedef struct cmd
 
 extern cmd cmds[16];
 
-void decoder(char *line,int line_num);
-void RunDecoder(FILE *SourceFile);
+void decoder(char *line, int line_num, FILE* objectFile);
+void RunDecoder(FILE *SourceFile, char* fileName);
 
 #endif

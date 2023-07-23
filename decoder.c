@@ -9,7 +9,7 @@ cmd cmds[] =
     {"stop", STOP}};
 
 
-void decoder(char *line, int line_num)
+void decoder(char *line, int line_num, FILE* objectFile)
 {
     int i;
     char *label, *comd, *operands;
@@ -26,7 +26,7 @@ void decoder(char *line, int line_num)
     }
     if (i != 16)
     {
-        err_msg = functions(cmds[i].value, operands);
+        err_msg = functions(cmds[i].value, operands, objectFile);
         if (err_msg != -1)
         {
             printf("Error in line %d: %s\n", line_num, error[err_msg].message);
@@ -38,14 +38,25 @@ void decoder(char *line, int line_num)
     }
 }
 
-void RunDecoder(FILE *SourceFile)
+void RunDecoder(FILE *SourceFile, char* fileName)
 {
+    FILE* objectFile;
     char line[MAX_LINE_LENGTH];
     int i = 0;
+
+    strtok(fileName, ".");
+
+    fileName = strcat(fileName, ".ob");
+    if((objectFile = fopen(fileName, "w")) == NULL)
+        {
+        printf("Cannot open file %s\n",fileName);
+        return 0;
+        }
+
     printf("starting\n");
     while(fgets(line, MAX_LINE_LENGTH, SourceFile) != NULL)
     {
-        decoder(line, i);
+        decoder(line, i, objectFile);
         i++;
     }
 }

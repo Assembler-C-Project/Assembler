@@ -21,7 +21,7 @@ RegsType regs[] = {
 
 };
 
-int functions(int command, char *operands)
+int functions(int command, char *operands, FILE* objectFile)
 {
     int *caching_methods_values;
     int err_msg;
@@ -140,9 +140,25 @@ int functions(int command, char *operands)
     }
 
     printf("The binaries are: %d %d %d\n", f_binaryint, s_binaryint, t_binaryint);
-    convertToBase64(f_binaryint, f_base64Chars);
-    convertToBase64(s_binaryint, s_base64Chars);
-    convertToBase64(t_binaryint, t_base64Chars);
+
+    if(f_binaryint > 0)
+    {
+        convertToBase64(f_binaryint, f_base64Chars);
+        fputs(f_base64Chars, objectFile);
+        fputs("\n", objectFile);
+    }
+    if(s_binaryint > 0)
+    {
+        convertToBase64(s_binaryint, s_base64Chars);
+        fputs(s_base64Chars, objectFile);
+        fputs("\n", objectFile);
+    }
+    if(t_binaryint > 0)
+    {
+        convertToBase64(s_binaryint, s_base64Chars);
+        fputs(s_base64Chars, objectFile);
+        fputs("\n", objectFile);
+    }
     printf("The binaries are: %s %s %s\n", f_base64Chars, s_base64Chars, t_base64Chars);
     
     return err_msg;
