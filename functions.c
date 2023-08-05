@@ -155,8 +155,8 @@ int functions(int command, char *operands, FILE* objectFile)
     }
     if(t_binaryint > 0)
     {
-        convertToBase64(s_binaryint, s_base64Chars);
-        fputs(s_base64Chars, objectFile);
+        convertToBase64(t_binaryint, t_base64Chars);
+        fputs(t_base64Chars, objectFile);
         fputs("\n", objectFile);
     }
     printf("The binaries are: %s %s %s\n", f_base64Chars, s_base64Chars, t_base64Chars);
