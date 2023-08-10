@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "states.h"
 
 #define NUM_OF_REGS 8

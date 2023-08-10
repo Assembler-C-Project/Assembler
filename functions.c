@@ -176,17 +176,16 @@ int functions(int command, char *operands, FILE *objectFile)
         }
     }
 
-    printf("The binaries are: ");
+
     j = 0;
     while (binaries[j] != '\0')
     {
         convertToBase64(binaries[j], f_base64Chars);
         fputs(f_base64Chars, objectFile);
         fputs("\n", objectFile);
-        printf("%s ", f_base64Chars);
         j++;
     }
-    printf("\n");
+
 
     return err_msg;
 }
@@ -475,20 +474,21 @@ void closeExtFile(const char *filename)
 }
 int is_valid_label(char *label)
 {
-    // Check if the label is empty
+    int i;
+    /* Check if the label is empty */
     if (label[0] == '\0')
     {
         return 0;
     }
 
-    // Check if the first character is a valid start for a label
+    /*Check if the first character is a valid start for a label*/
     if (!isalpha(label[0]) && label[0] != '_')
     {
         return 0;
     }
 
-    // Check the rest of the characters
-    for (int i = 1; i < strlen(label); i++)
+    /* Check the rest of the characters*/
+    for ( i = 1; i < strlen(label); i++)
     {
         if (!isalnum(label[i]) && label[i] != '_')
         {
