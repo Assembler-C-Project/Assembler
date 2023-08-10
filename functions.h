@@ -60,4 +60,5 @@ void writeToExtFile(const char* filename, const char* line);
 void closeExtFile(const char* filename);
 int* data_op_divider(char *operands);
 int *string_op_divider(char *operands);
+void delAllFiles(const char *fileName);
 #endif

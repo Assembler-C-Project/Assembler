@@ -38,7 +38,6 @@ void saveMacro(FILE* file, char* macroName, Macro* macroTable[], int* macroCount
 void unfoldMacros(FILE* sourceFile, FILE* outputFile, Macro* macroTable[], int* macroCount) 
 {
     char line[MAX_LINE_LENGTH];
-    int macroFlag = 0;
     char macroName[MAX_LINE_LENGTH];
     char expandedLine[MAX_LINE_LENGTH];
     int i;
@@ -63,7 +62,6 @@ void unfoldMacros(FILE* sourceFile, FILE* outputFile, Macro* macroTable[], int* 
         {
             if (strcmp(macroName, macroTable[i]->name) == 0) 
             {
-                macroFlag = 1;
                 for (j = 0; j < macroTable[i]->lineCount; j++) 
                 {
                     sprintf(expandedLine, "%s", macroTable[i]->lines[j]);

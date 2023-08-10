@@ -2,7 +2,7 @@
 CC := gcc
 
 # Compiler flags
-CFLAGS := -Wall -Wextra
+CFLAGS := -Wall -ansi -pedantic
 
 # Source files
 SRCS := decoder.c functions.c Interpreter.c PreAssem.c main.c

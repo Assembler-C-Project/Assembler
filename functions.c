@@ -184,8 +184,8 @@ int functions(int command, char *operands, FILE *objectFile)
         fputs("\n", objectFile);
         printf("%s ", f_base64Chars);
         j++;
-
     }
+    printf("\n");
    
 
     return err_msg;
@@ -468,5 +468,50 @@ void closeExtFile(const char *filename)
     if (file != NULL)
     {
         fclose(file);
+    }
+}
+
+void delAllFiles(const char *name)
+{
+    char fileName[50];
+    FILE *amFile;
+    FILE *obFile;
+    FILE *entFile;
+    FILE *extFile;
+    char am[50], ob[50], ent[50], ext[50];
+
+    strcpy(fileName, name);
+
+    strcpy(am, fileName);
+    strcat(am, ".am");
+    
+    strcpy(ob, fileName);
+    strcat(ob, ".ob");
+
+    strcpy(ent, fileName);
+    strcat(ent, ".ent");
+
+    strcpy(ext, fileName);
+    strcat(ext, ".ext");
+
+    if ((amFile = fopen(am, "r")) != NULL) 
+    {
+        fclose(amFile);
+        remove(am);
+    }
+    if ((obFile = fopen(ob, "r")) != NULL) 
+    {
+        fclose(obFile);
+        remove(ob);
+    }
+    if ((entFile = fopen(ent, "r")) != NULL) 
+    {
+        fclose(entFile);
+        remove(ent);
+    }
+    if ((extFile = fopen(ext, "r")) != NULL) 
+    {
+        fclose(extFile);
+        remove(ext);
     }
 }

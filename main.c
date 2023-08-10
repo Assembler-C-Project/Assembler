@@ -37,6 +37,5 @@ int main(int argc, char *argv[])
         
         RunDecoder(WorkFile, FileName);
     }
-    
     return 0;
 }
