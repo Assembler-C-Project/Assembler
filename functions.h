@@ -47,7 +47,7 @@ typedef struct RegsType
 
 extern RegsType regs[8];
 
-
+int is_valid_label(char *label);
 int *method_OpDivider(char *operands, char **first_op, char **second_op);
 int search_data(char *operand);
 int functions(int command, char *operands, FILE* objectFile);

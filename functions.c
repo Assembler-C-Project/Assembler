@@ -6,7 +6,8 @@ ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
                      {ERR_1_OP, "Expected 1 operand\n"},
                      {ERR_0_OP, "Command doesn't take operands\n"},
                      {ERR_DEST_TYPE, "Destination operand type error\n"},
-                     {ERR_SRC_TYPE, "Source operand type error\n"}};
+                     {ERR_SRC_TYPE, "Source operand type error\n"},
+                     {ERR_INV_LABEL, "Invalid label name\n"}};
 
 RegsType regs[] = {
     {"r0", 0},
@@ -34,7 +35,7 @@ int functions(int command, char *operands, FILE *objectFile)
     int t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
     char *f_base64Chars = malloc(3 * sizeof(char));
-    
+
     binaries = malloc(3 * sizeof(int));
     binaries[0] = binaries[1] = binaries[2] = '\0';
     err_num = 0;
@@ -186,7 +187,6 @@ int functions(int command, char *operands, FILE *objectFile)
         j++;
     }
     printf("\n");
-   
 
     return err_msg;
 }
@@ -308,7 +308,8 @@ int *data_op_divider(char *operands)
     {
         val_ptr = realloc(val_ptr, i * sizeof(int));
         val_ptr[i - 1] = strtol(token, &err, 10);
-        if (!err){
+        if (!err)
+        {
             return NULL;
         }
         token = strtok(NULL, ",");
@@ -322,14 +323,14 @@ int *string_op_divider(char *operands)
 {
     int *val_ptr;
     int i, size;
-    size = strlen(operands)-1;
+    size = strlen(operands) - 1;
     if (operands[0] == '"' && operands[size - 1] == '"')
     {
         val_ptr = (int *)malloc(size * sizeof(int));
 
         i = 0;
 
-        while (i < size-1 )
+        while (i < size - 1)
         {
             val_ptr[i] = (int)operands[i + 1];
             i++;
@@ -472,7 +473,31 @@ void closeExtFile(const char *filename)
         fclose(file);
     }
 }
+int is_valid_label(char *label)
+{
+    // Check if the label is empty
+    if (label[0] == '\0')
+    {
+        return 0;
+    }
 
+    // Check if the first character is a valid start for a label
+    if (!isalpha(label[0]) && label[0] != '_')
+    {
+        return 0;
+    }
+
+    // Check the rest of the characters
+    for (int i = 1; i < strlen(label); i++)
+    {
+        if (!isalnum(label[i]) && label[i] != '_')
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
 void delAllFiles(const char *name)
 {
     char fileName[50];
@@ -486,7 +511,7 @@ void delAllFiles(const char *name)
 
     strcpy(am, fileName);
     strcat(am, ".am");
-    
+
     strcpy(ob, fileName);
     strcat(ob, ".ob");
 
@@ -496,22 +521,22 @@ void delAllFiles(const char *name)
     strcpy(ext, fileName);
     strcat(ext, ".ext");
 
-    if ((amFile = fopen(am, "r")) != NULL) 
+    if ((amFile = fopen(am, "r")) != NULL)
     {
         fclose(amFile);
         remove(am);
     }
-    if ((obFile = fopen(ob, "r")) != NULL) 
+    if ((obFile = fopen(ob, "r")) != NULL)
     {
         fclose(obFile);
         remove(ob);
     }
-    if ((entFile = fopen(ent, "r")) != NULL) 
+    if ((entFile = fopen(ent, "r")) != NULL)
     {
         fclose(entFile);
         remove(ent);
     }
-    if ((extFile = fopen(ext, "r")) != NULL) 
+    if ((extFile = fopen(ext, "r")) != NULL)
     {
         fclose(extFile);
         remove(ext);
