@@ -10,9 +10,16 @@ void decoder(char *line, int line_num, FILE *objectFile)
     char *label, *comd, *operands;
     int err_msg;
     int line_type;
-
+    err_msg = -1;
     line_type = divider(line, &label, &comd, &operands);
-
+    if (!is_valid_label(label))
+    {
+        err_msg = ERR_INV_LABEL;
+    }
+    if (err_msg != -1)
+    {
+        printf("Error in line %d: %s\n", line_num, error[err_msg].message);
+    }
     printf("%s: %s %s", label, comd, operands);
     switch (line_type)
     {
