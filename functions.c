@@ -385,8 +385,9 @@ void convertToBinary(short decimalNumber, char *binary)
 
 FILE *openEntFile(const char *name)
 {
-    char *filename = strcat(name, ".ent");
+    char filename[50];
     FILE *file = fopen(filename, "r");
+    strcpy(filename, name);
     if (file)
     {
         /* If the file exists, close it and reopen it in append mode */
@@ -429,8 +430,9 @@ void closeEntFile(const char *filename)
 
 FILE *openExtFile(const char *name)
 {
-    char *filename = strcat(name, ".ext");
+    char filename[50];
     FILE *file = fopen(filename, "r");
+    strcpy(filename, name);
     if (file)
     {
         /* If the file exists, close it and reopen it in append mode */
