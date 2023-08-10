@@ -1,60 +1,88 @@
 #include "decoder.h"
 
 cmd cmds[] =
-    {{"mov", MOV}, {"cmp", CMP}, {"add", ADD}, 
-    {"sub", SUB}, {"not", NOT}, {"clr", CLR}, 
-    {"lea", LEA}, {"inc", INC}, {"dec", DEC}, 
-    {"jmp", JMP}, {"bne", BNE}, {"red", RED}, 
-    {"prn", PRN}, {"jsr", JSR}, {"rts", RTS}, 
-    {"stop", STOP}};
-
-
-void decoder(char *line, int line_num, FILE* objectFile)
+    {{"mov", MOV}, {"cmp", CMP}, {"add", ADD}, {"sub", SUB}, {"not", NOT}, {"clr", CLR}, {"lea", LEA}, {"inc", INC}, {"dec", DEC}, {"jmp", JMP}, {"bne", BNE}, {"red", RED}, {"prn", PRN}, {"jsr", JSR}, {"rts", RTS}, {"stop", STOP}};
+inst insts[] = {
+    {".data", IS_DATA}, {".string", IS_STRING}, {".entry", IS_ENTRY}, {".extern", IS_EXTERN}};
+void decoder(char *line, int line_num, FILE *objectFile)
 {
     int i;
     char *label, *comd, *operands;
     int err_msg;
-    divider(line, &label, &comd, &operands);
-    i = 0;
-    while (i < 16)
+    int line_type;
+
+    line_type = divider(line, &label, &comd, &operands);
+
+    printf("%s: %s %s", label, comd, operands);
+    switch (line_type)
     {
-        if (!strcmp(comd, cmds[i].name))
+    case IS_COMMAND:
+        i = 0;
+        while (i < 16)
         {
-            break;
+            if (!strcmp(comd, cmds[i].name))
+            {
+                break;
+            }
+            i++;
         }
-        i++;
-    }
-    if (i != 16)
-    {
-        err_msg = functions(cmds[i].value, operands, objectFile);
-        if (err_msg != -1)
+        if (i != 16)
         {
-            printf("Error in line %d: %s\n", line_num, error[err_msg].message);
+            err_msg = functions(cmds[i].value, operands, objectFile);
+            if (err_msg != -1)
+            {
+                printf("Error in line %d: %s\n", line_num, error[err_msg].message);
+            }
         }
-    }
-    else
-    {
-        printf("ERR: Wrong command found!\n");
+        else
+        {
+            printf("ERR: Wrong command found!\n");
+        }
+        break;
+    case IS_INSTRUCTION:
+        i = 0;
+        while (i < 4)
+        {
+            if (!strcmp(comd, insts[i].name))
+            {
+                break;
+            }
+            i++;
+        }
+        if (i != 4)
+        {
+            err_msg = functions(insts[i].value, operands, objectFile);
+            if (err_msg != -1)
+            {
+                printf("Error in line %d: %s\n", line_num, error[err_msg].message);
+            }
+        }
+        else
+        {
+            printf("ERR: Wrong instruction found!\n");
+        }
+
+        break;
     }
 }
 
-void RunDecoder(FILE *SourceFile, char* fileName)
+void RunDecoder(FILE *SourceFile, char *fileName)
 {
-    FILE* objectFile;
+    FILE *objectFile;
     char line[MAX_LINE_LENGTH];
     int i = 0;
 
     strtok(fileName, ".");
 
     fileName = strcat(fileName, ".ob");
-    if((objectFile = fopen(fileName, "w")) == NULL)
-        {
-        printf("Cannot open file %s\n",fileName);
-        return 0;
-        }
+    if ((objectFile = fopen(fileName, "w")) == NULL)
+    {
+        printf("Cannot open file %s\n", fileName);
+        return;
+    }
 
     printf("starting\n");
-    while(fgets(line, MAX_LINE_LENGTH, SourceFile) != NULL)
+    while (fgets(line, MAX_LINE_LENGTH, SourceFile) != NULL)
     {
         decoder(line, i, objectFile);
         i++;

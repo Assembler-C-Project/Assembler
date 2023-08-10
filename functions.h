@@ -17,7 +17,10 @@
 
 #define SOURCE_REG_SHIFT 7
 #define DESTINATION_REG_SHIFT 2
-
+#define IS_DATA 16
+#define IS_STRING 17
+#define IS_ENTRY 18
+#define IS_EXTERN 19
 enum error_code
 {
     ERR_2_OPS,
@@ -55,5 +58,6 @@ void closeEntFile(const char* filename);
 FILE* openExtFile(const char* name);
 void writeToExtFile(const char* filename, const char* line);
 void closeExtFile(const char* filename);
-
+int* data_op_divider(char *operands);
+int *string_op_divider(char *operands);
 #endif

@@ -2,12 +2,25 @@
 #include <string.h>
 #include <stdio.h>
 
-void divider(char *line, char **label, char **instruction, char **operands)
+int divider(char *line, char **label, char **instruction, char **operands)
 {
     char *rest;
+    /*Check if this is a comment line*/
+    if (!strncmp(line, ";", 1))
+    {
+
+        label = NULL;
+        instruction = NULL;
+        operands = NULL;
+        return IS_COMMENT_EMPTY;
+    }
+    /*Discard comment in line*/
+    strtok(line, ";");
+
+    /*Get the label*/
     *label = strtok(line, ":");
     rest = strtok(NULL, "");
-    
+    /*If there is no label*/
     if (rest == NULL || strlen(rest) == 0)
     {
         if (*label != NULL)
@@ -17,6 +30,7 @@ void divider(char *line, char **label, char **instruction, char **operands)
         *label = NULL;
     }
 
+    /*If the rest of the line is not null*/
     if (strlen(rest) > 0)
     {
         *instruction = strtok(rest, " ");
@@ -28,14 +42,23 @@ void divider(char *line, char **label, char **instruction, char **operands)
         if (*instruction != NULL)
         {
             remove_spaces(*instruction);
+            if (!strncmp(*instruction, ".", 1))
+            {
+                return IS_INSTRUCTION;
+            }
+            return IS_COMMAND;
         }
     }
     else
     {
         *instruction = NULL;
         *operands = NULL;
+        
     }
+    return IS_COMMENT_EMPTY;
 }
+
+
 void remove_spaces(char *str)
 {
 

@@ -1,13 +1,12 @@
 #include "functions.h"
 /*caching_methods_values=[ 0:first_operand_meth   1:first_operand_value,
-                           2:second_operand_meth  3:second_operand_value]*/
+                           2:second_operand_meth  3:second_operand_value 4:number of operands]*/
 
 ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
-             {ERR_1_OP, "Expected 1 operand\n"},
-             {ERR_0_OP, "Command doesn't take operands\n"},
-             {ERR_DEST_TYPE, "Destination operand type error\n"},
-             {ERR_SRC_TYPE, "Source operand type error\n"}};
-
+                     {ERR_1_OP, "Expected 1 operand\n"},
+                     {ERR_0_OP, "Command doesn't take operands\n"},
+                     {ERR_DEST_TYPE, "Destination operand type error\n"},
+                     {ERR_SRC_TYPE, "Source operand type error\n"}};
 
 RegsType regs[] = {
     {"r0", 0},
@@ -21,146 +20,174 @@ RegsType regs[] = {
 
 };
 
-int functions(int command, char *operands, FILE* objectFile)
+int functions(int command, char *operands, FILE *objectFile)
 {
     int *caching_methods_values;
     int err_msg;
     int err_num;
+    int j;
     char *first_op;
     char *second_op;
+    int *binaries;
     int f_binaryint;
     int s_binaryint;
     int t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
-    char* f_base64Chars = malloc(3 * sizeof(char));
-    char* s_base64Chars = malloc(3 * sizeof(char));
-    char* t_base64Chars = malloc(3 * sizeof(char));
-
-
-    caching_methods_values = method_OpDivider(operands, &first_op, &second_op);
-    first_meth = caching_methods_values[0];
-    first_value = caching_methods_values[1];
-    second_meth = caching_methods_values[2];
-    second_value = caching_methods_values[3];
-    num_of_ops = caching_methods_values[4];
-
+    char *f_base64Chars = malloc(3 * sizeof(char));
+    
+    binaries = malloc(3 * sizeof(int));
+    binaries[0] = binaries[1] = binaries[2] = '\0';
     err_num = 0;
     err_msg = -1;
-    if (!err_num && num_of_ops != 2 && ((command >= MOV && command <= SUB) || command == LEA))
+    if (command < 16)
     {
-        err_msg = ERR_2_OPS;
-        err_num++;
-    }
-    if (!err_num && num_of_ops != 1 && ((command >= INC && command <= JSR) || command == NOT || command == CLR))
-    {
-        err_msg = ERR_1_OP;
-        err_num++;
-    }
-    if (!err_num && num_of_ops != 0 && (command == STOP || command == RTS))
+        caching_methods_values = method_OpDivider(operands, &first_op, &second_op);
+        first_meth = caching_methods_values[0];
+        first_value = caching_methods_values[1];
+        second_meth = caching_methods_values[2];
+        second_value = caching_methods_values[3];
+        num_of_ops = caching_methods_values[4];
 
-    {
-        err_msg = ERR_0_OP;
-        err_num++;
-    }
-
-    if (!err_num && (second_meth == 1) && (command != CMP && command != PRN && command != STOP && command != RTS))
-    {
-
-        err_msg = ERR_DEST_TYPE;
-        err_num++;
-    }
-
-    if (!err_num && first_meth != 3 && command == LEA)
-    {
-        err_msg = ERR_SRC_TYPE;
-        err_num++;
-    }
-
-    f_binaryint = 0;
-    s_binaryint = 0;
-    t_binaryint = 0;
-
-    if (!err_num)
-    {
-        f_binaryint |= (first_meth << SOURCE_OPERAND_SHIFT);
-        f_binaryint |= (command << OPCODE_SHIFT);
-        f_binaryint |= (second_meth << DESTINATION_OPERAND_SHIFT);
-
-        if (first_meth == 5)
+        if (!err_num && num_of_ops != 2 && ((command >= MOV && command <= SUB) || command == LEA))
         {
-            s_binaryint |= (first_value << SOURCE_REG_SHIFT);
-            if (second_meth == 5)
-            {
-                s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
-            }
-            else if (second_meth == 3 || second_meth == 1)
-            {
-                t_binaryint |= (second_value << 2);
-                if (second_meth == 3)
-                {
-                    t_binaryint |= 2;
-                }
-            }
+            err_msg = ERR_2_OPS;
+            err_num++;
         }
-        else if (first_meth == 3 || first_meth == 1)
+        if (!err_num && num_of_ops != 1 && ((command >= INC && command <= JSR) || command == NOT || command == CLR))
         {
-            s_binaryint |= (first_value << 2);
-            if (first_meth == 3)
-            {
-                s_binaryint |= 2;
-            }
-            if (second_meth == 5)
-            {
-                t_binaryint |= (second_value << DESTINATION_REG_SHIFT);
-            }
-            else if (second_meth == 3 || second_meth == 1)
-            {
-                t_binaryint |= (second_value << 2);
-                if (second_meth == 3)
-                {
-                    t_binaryint |= 2;
-                }
-            }
+            err_msg = ERR_1_OP;
+            err_num++;
         }
-        if (!first_op){
-             if (second_meth == 5)
+        if (!err_num && num_of_ops != 0 && (command == STOP || command == RTS))
+
+        {
+            err_msg = ERR_0_OP;
+            err_num++;
+        }
+
+        if (!err_num && (second_meth == 1) && (command != CMP && command != PRN && command != STOP && command != RTS))
+        {
+
+            err_msg = ERR_DEST_TYPE;
+            err_num++;
+        }
+
+        if (!err_num && first_meth != 3 && command == LEA)
+        {
+            err_msg = ERR_SRC_TYPE;
+            err_num++;
+        }
+
+        f_binaryint = 0;
+        s_binaryint = 0;
+        t_binaryint = 0;
+
+        if (!err_num)
+        {
+            f_binaryint |= (first_meth << SOURCE_OPERAND_SHIFT);
+            f_binaryint |= (command << OPCODE_SHIFT);
+            f_binaryint |= (second_meth << DESTINATION_OPERAND_SHIFT);
+            binaries[0] = f_binaryint;
+
+            if (first_meth == 5)
             {
-                s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
+                s_binaryint |= (first_value << SOURCE_REG_SHIFT);
+                if (second_meth == 5)
+                {
+                    s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
+                }
+
+                else if (second_meth == 3 || second_meth == 1)
+                {
+                    t_binaryint |= (second_value << 2);
+                    if (second_meth == 3)
+                    {
+                        t_binaryint |= 2;
+                    }
+                    binaries[2] = t_binaryint;
+                }
+                binaries[1] = s_binaryint;
             }
-            else if (second_meth == 3 || second_meth == 1)
+            else if (first_meth == 3 || first_meth == 1)
             {
-                s_binaryint |= (second_value << 2);
-                if (second_meth == 3)
+                s_binaryint |= (first_value << 2);
+                if (first_meth == 3)
                 {
                     s_binaryint |= 2;
                 }
+                if (second_meth == 5)
+                {
+                    t_binaryint |= (second_value << DESTINATION_REG_SHIFT);
+                    binaries[2] = t_binaryint;
+                }
+                else if (second_meth == 3 || second_meth == 1)
+                {
+                    t_binaryint |= (second_value << 2);
+                    if (second_meth == 3)
+                    {
+                        t_binaryint |= 2;
+                    }
+                    binaries[2] = t_binaryint;
+                }
+                binaries[1] = s_binaryint;
+            }
+            if (!first_op)
+            {
+                if (second_meth == 5)
+                {
+                    s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
+                }
+                else if (second_meth == 3 || second_meth == 1)
+                {
+                    s_binaryint |= (second_value << 2);
+                    if (second_meth == 3)
+                    {
+                        s_binaryint |= 2;
+                    }
+                }
+                binaries[1] = s_binaryint;
             }
         }
-
+    }
+    else
+    {
+        if (command == IS_DATA)
+        {
+            if (data_op_divider(operands) == NULL)
+            {
+                err_msg = ERR_1_OP;
+            }
+            else
+            {
+                binaries = data_op_divider(operands);
+            }
+        }
+        else if (command == IS_STRING)
+        {
+            if (string_op_divider(operands) == NULL)
+            {
+                err_msg = ERR_1_OP;
+            }
+            else
+            {
+                binaries = string_op_divider(operands);
+            }
+        }
     }
 
-    printf("The binaries are: %d %d %d\n", f_binaryint, s_binaryint, t_binaryint);
-
-    if(f_binaryint > 0)
+    printf("The binaries are: ");
+    j = 0;
+    while (binaries[j] != '\0')
     {
-        convertToBase64(f_binaryint, f_base64Chars);
+        convertToBase64(binaries[j], f_base64Chars);
         fputs(f_base64Chars, objectFile);
         fputs("\n", objectFile);
+        printf("%s ", f_base64Chars);
+        j++;
+
     }
-    if(s_binaryint > 0)
-    {
-        convertToBase64(s_binaryint, s_base64Chars);
-        fputs(s_base64Chars, objectFile);
-        fputs("\n", objectFile);
-    }
-    if(t_binaryint > 0)
-    {
-        convertToBase64(t_binaryint, t_base64Chars);
-        fputs(t_base64Chars, objectFile);
-        fputs("\n", objectFile);
-    }
-    printf("The binaries are: %s %s %s\n", f_base64Chars, s_base64Chars, t_base64Chars);
-    
+   
+
     return err_msg;
 }
 
@@ -267,32 +294,82 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
     result[4] = num_of_ops;
     return result;
 }
+int *data_op_divider(char *operands)
+{
+    int *val_ptr;
+    int i;
+    char *token, *err;
+
+    val_ptr = (int *)malloc(1 * sizeof(int));
+
+    i = 1;
+    token = strtok(operands, ",");
+    while (token != NULL)
+    {
+        val_ptr = realloc(val_ptr, i * sizeof(int));
+        val_ptr[i - 1] = strtol(token, &err, 10);
+        if (!err){
+            return NULL;
+        }
+        token = strtok(NULL, ",");
+        i++;
+    }
+    val_ptr[i - 1] = '\0';
+
+    return val_ptr;
+}
+int *string_op_divider(char *operands)
+{
+    int *val_ptr;
+    int i, size;
+    size = strlen(operands)-1;
+    if (operands[0] == '"' && operands[size - 1] == '"')
+    {
+        val_ptr = (int *)malloc(size * sizeof(int));
+
+        i = 0;
+
+        while (i < size-1 )
+        {
+            val_ptr[i] = (int)operands[i + 1];
+            i++;
+        }
+        val_ptr[i] = '\0';
+
+        return val_ptr;
+    }
+    return NULL;
+}
+
 int search_data(char *operand)
 {
     return 117;
     /*-returns a value from the data sheet*/
 }
 
-void convertToBase64(short decimalNumber, char *base64Chars) {
+void convertToBase64(short decimalNumber, char *base64Chars)
+{
     char base64Map[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     /* Make sure the decimalNumber is 12 bits.*/
-    if (decimalNumber < 0 || decimalNumber > 4095) {
+    if (decimalNumber < 0 || decimalNumber > 4095)
+    {
         printf("The decimalNumber is not a 12 bits number.\n");
         exit(1);
     }
-    
+
     /* Extract the first and second 6 bits and convert to corresponding base64 characters. */
     base64Chars[0] = base64Map[(decimalNumber & 0xFC0) >> 6];
     base64Chars[1] = base64Map[decimalNumber & 0x3F];
     base64Chars[2] = '\0';
 }
 
-void convertToBinary(short decimalNumber, char *binary) 
+void convertToBinary(short decimalNumber, char *binary)
 {
     int i;
     /* Make sure the decimalNumber is 12 bits. */
-    if (decimalNumber < 0 || decimalNumber > 4095) {
+    if (decimalNumber < 0 || decimalNumber > 4095)
+    {
         printf("The decimalNumber is not a 12 bits number.\n");
         exit(1);
     }
@@ -300,20 +377,24 @@ void convertToBinary(short decimalNumber, char *binary)
     binary[12] = '\0';
 
     /* Convert each bit to binary, starting from the highest (11th) bit. */
-    for (i = 11; i >= 0; --i) {
+    for (i = 11; i >= 0; --i)
+    {
         binary[11 - i] = ((decimalNumber & (1 << i)) != 0) ? '1' : '0';
     }
 }
 
-FILE* openEntFile(const char* name) 
+FILE *openEntFile(const char *name)
 {
     char *filename = strcat(name, ".ent");
-    FILE* file = fopen(filename, "r");
-    if (file) {
+    FILE *file = fopen(filename, "r");
+    if (file)
+    {
         /* If the file exists, close it and reopen it in append mode */
         fclose(file);
         file = fopen(filename, "a");
-    } else {
+    }
+    else
+    {
         /* If the file doesn't exist, open it in write mode to create it */
         file = fopen(filename, "w");
     }
@@ -321,37 +402,43 @@ FILE* openEntFile(const char* name)
     return file;
 }
 
-void writeToEntFile(const char* filename, const char* line) 
+void writeToEntFile(const char *filename, const char *line)
 {
-    FILE* file = openEntFile(filename);
+    FILE *file = openEntFile(filename);
 
-    if (file) {
+    if (file)
+    {
         fprintf(file, "%s\n", line);
         fclose(file);
-    } else {
+    }
+    else
+    {
         printf("Failed to open the file.\n");
     }
 }
 
-void closeEntFile(const char* filename) 
+void closeEntFile(const char *filename)
 {
-    FILE* file = fopen(filename, "r");
+    FILE *file = fopen(filename, "r");
 
-    if (file != NULL) 
+    if (file != NULL)
     {
         fclose(file);
     }
 }
 
-FILE* openExtFile(const char* name) 
+FILE *openExtFile(const char *name)
 {
     char *filename = strcat(name, ".ext");
-    FILE* file = fopen(filename, "r");
-    if (file) {
+    FILE *file = fopen(filename, "r");
+    if (file)
+    {
         /* If the file exists, close it and reopen it in append mode */
         fclose(file);
         file = fopen(filename, "a");
-    } else {
+    }
+    else
+    {
         /* If the file doesn't exist, open it in write mode to create it */
         file = fopen(filename, "w");
     }
@@ -359,25 +446,27 @@ FILE* openExtFile(const char* name)
     return file;
 }
 
-void writeToExtFile(const char* filename, const char* line) 
+void writeToExtFile(const char *filename, const char *line)
 {
-    FILE* file = openEntFile(filename);
+    FILE *file = openEntFile(filename);
 
-    if (file) {
+    if (file)
+    {
         fprintf(file, "%s\n", line);
         fclose(file);
-    } else {
+    }
+    else
+    {
         printf("Failed to open the file.\n");
     }
 }
 
-void closeExtFile(const char* filename) 
+void closeExtFile(const char *filename)
 {
-    FILE* file = fopen(filename, "r");
+    FILE *file = fopen(filename, "r");
 
-    if (file != NULL) 
+    if (file != NULL)
     {
         fclose(file);
     }
 }
-
