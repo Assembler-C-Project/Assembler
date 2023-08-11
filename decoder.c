@@ -75,6 +75,7 @@ void decoder(char *line, int line_num, FILE *objectFile)
 
 void RunDecoder(FILE *SourceFile, char *fileName)
 {
+    LabelNode *lables;
     FILE *objectFile;
     char line[MAX_LINE_LENGTH];
     int i = 0;
@@ -89,6 +90,8 @@ void RunDecoder(FILE *SourceFile, char *fileName)
     }
 
     printf("starting\n");
+    runFirsPass(SourceFile, lables);
+    rewind(SourceFile);
     while (fgets(line, MAX_LINE_LENGTH, SourceFile) != NULL)
     {
         decoder(line, i, objectFile);
