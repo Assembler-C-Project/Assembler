@@ -386,8 +386,9 @@ void convertToBinary(short decimalNumber, char *binary)
 FILE *openEntFile(const char *name)
 {
     char filename[50];
-    FILE *file = fopen(filename, "r");
+    FILE *file;
     strcpy(filename, name);
+    file = fopen(filename, "r");
     if (file)
     {
         /* If the file exists, close it and reopen it in append mode */
@@ -431,8 +432,9 @@ void closeEntFile(const char *filename)
 FILE *openExtFile(const char *name)
 {
     char filename[50];
-    FILE *file = fopen(filename, "r");
+    FILE *file;
     strcpy(filename, name);
+    file = fopen(filename, "r");
     if (file)
     {
         /* If the file exists, close it and reopen it in append mode */
