@@ -48,6 +48,12 @@ typedef struct RegsType
 
 extern RegsType regs[8];
 
+typedef struct LabelNode {
+    char label[50];
+    int address;
+    struct LabelNode *next;
+}LabelNode;
+
 int is_valid_label(char *label);
 int *method_OpDivider(char *operands, char **first_op, char **second_op);
 int search_data(char *operand);
@@ -63,4 +69,5 @@ void closeExtFile(const char* filename);
 int* data_op_divider(char *operands);
 int *string_op_divider(char *operands);
 void delAllFiles(const char *fileName);
+void runFirsPass(FILE *file, LabelNode *labels);
 #endif
