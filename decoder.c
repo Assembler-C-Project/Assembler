@@ -75,7 +75,7 @@ void decoder(char *line, int line_num, FILE *objectFile)
 
 void RunDecoder(FILE *SourceFile, char *fileName)
 {
-    LabelNode *lables;
+    LabelNode *lables = NULL;
     FILE *objectFile;
     char line[MAX_LINE_LENGTH];
     int i = 0;

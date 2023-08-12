@@ -452,7 +452,7 @@ FILE *openExtFile(const char *name)
 
 void writeToExtFile(const char *filename, const char *line)
 {
-    FILE *file = openEntFile(filename);
+    FILE *file = openExtFile(filename);
 
     if (file)
     {
