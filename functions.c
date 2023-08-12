@@ -21,12 +21,15 @@ RegsType regs[] = {
 
 };
 
-int functions(int command, char *operands, FILE *objectFile)
+int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars)
 {
+    char **newBase64Chars;
+    int IC;
+    int DC;
     int *caching_methods_values;
     int err_msg;
     int err_num;
-    int j;
+    int j, i;
     char *first_op;
     char *second_op;
     int *binaries;
@@ -34,12 +37,16 @@ int functions(int command, char *operands, FILE *objectFile)
     int s_binaryint;
     int t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
-    char *f_base64Chars = malloc(3 * sizeof(char));
+
+    char *f_base64Chars;
+    f_base64Chars = malloc(3 * sizeof(char));
 
     binaries = malloc(3 * sizeof(int));
-    binaries[0] = binaries[1] = binaries[2] = '\0';
+    binaries[0] = binaries[1] = binaries[2] = binaries[3] = END_OF_BIN;
     err_num = 0;
     err_msg = -1;
+    IC = 0;
+    DC = 0;
     if (command < 16)
     {
         caching_methods_values = method_OpDivider(operands, &first_op, &second_op);
@@ -87,64 +94,73 @@ int functions(int command, char *operands, FILE *objectFile)
             f_binaryint |= (command << OPCODE_SHIFT);
             f_binaryint |= (second_meth << DESTINATION_OPERAND_SHIFT);
             binaries[0] = f_binaryint;
-
-            if (first_meth == 5)
+            IC++;
+            if (first_meth || second_meth)
             {
-                s_binaryint |= (first_value << SOURCE_REG_SHIFT);
-                if (second_meth == 5)
+                if (first_meth == 5)
                 {
-                    s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
-                }
-
-                else if (second_meth == 3 || second_meth == 1)
-                {
-                    t_binaryint |= (second_value << 2);
-                    if (second_meth == 3)
+                    s_binaryint |= (first_value << SOURCE_REG_SHIFT);
+                    if (second_meth == 5)
                     {
-                        t_binaryint |= 2;
+                        s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
                     }
-                    binaries[2] = t_binaryint;
-                }
-                binaries[1] = s_binaryint;
-            }
-            else if (first_meth == 3 || first_meth == 1)
-            {
-                s_binaryint |= (first_value << 2);
-                if (first_meth == 3)
-                {
-                    s_binaryint |= 2;
-                }
-                if (second_meth == 5)
-                {
-                    t_binaryint |= (second_value << DESTINATION_REG_SHIFT);
-                    binaries[2] = t_binaryint;
-                }
-                else if (second_meth == 3 || second_meth == 1)
-                {
-                    t_binaryint |= (second_value << 2);
-                    if (second_meth == 3)
+
+                    else if (second_meth == 3 || second_meth == 1)
                     {
-                        t_binaryint |= 2;
+                        t_binaryint |= (second_value << 2);
+                        if (second_meth == 3)
+                        {
+                            t_binaryint |= 2;
+                        }
+                        binaries[2] = t_binaryint;
+                        IC++;
                     }
-                    binaries[2] = t_binaryint;
+                    binaries[1] = s_binaryint;
+                    IC++;
                 }
-                binaries[1] = s_binaryint;
-            }
-            if (!first_op)
-            {
-                if (second_meth == 5)
+                else if (first_meth == 3 || first_meth == 1)
                 {
-                    s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
-                }
-                else if (second_meth == 3 || second_meth == 1)
-                {
-                    s_binaryint |= (second_value << 2);
-                    if (second_meth == 3)
+                    s_binaryint |= (first_value << 2);
+                    if (first_meth == 3)
                     {
                         s_binaryint |= 2;
                     }
+                    if (second_meth == 5)
+                    {
+                        t_binaryint |= (second_value << DESTINATION_REG_SHIFT);
+                        binaries[2] = t_binaryint;
+                        IC++;
+                    }
+                    else if (second_meth == 3 || second_meth == 1)
+                    {
+                        t_binaryint |= (second_value << 2);
+                        if (second_meth == 3)
+                        {
+                            t_binaryint |= 2;
+                        }
+                        binaries[2] = t_binaryint;
+                        IC++;
+                    }
+                    binaries[1] = s_binaryint;
+                    IC++;
                 }
-                binaries[1] = s_binaryint;
+                if (!first_op)
+                {
+                    if (second_meth == 5)
+                    {
+                        s_binaryint |= (second_value << DESTINATION_REG_SHIFT);
+                    }
+                    else if (second_meth == 3 || second_meth == 1)
+                    {
+                        s_binaryint |= (second_value << 2);
+                        if (second_meth == 3)
+                        {
+                            s_binaryint |= 2;
+                        }
+                    }
+                    binaries[1] = s_binaryint;
+                    IC++;
+                }
             }
         }
     }
@@ -165,11 +181,13 @@ int functions(int command, char *operands, FILE *objectFile)
         {
             if (string_op_divider(operands) == NULL)
             {
-                err_msg = ERR_1_OP;
+
+                err_msg = ERR_SRC_TYPE;
             }
             else
             {
                 binaries = string_op_divider(operands);
+                DC++;
             }
         }
         else if (command == IS_ENTRY)
@@ -178,19 +196,29 @@ int functions(int command, char *operands, FILE *objectFile)
         }
         else if (command == IS_EXTERN)
         {
-            
         }
+        j = 0;
+        while (binaries[j] != END_OF_BIN)
+        {
+            j++;
+        }
+        DC = j;
+    }
+    j = *curr_IC + *curr_DC;
+    *curr_IC += IC;
+    *curr_DC += DC;
+
+    *base64Chars = (char **)realloc(*base64Chars, (*curr_IC + *curr_DC + 1) * sizeof(char *));
+
+    i = 0;
+    while (binaries[i] != END_OF_BIN)
+    {
+        (*base64Chars)[j] = (char *)malloc(4 * sizeof(char));
+        convertToBase64(binaries[i], (*base64Chars)[j]);
+        j++;
+        i++;
     }
 
-    j = 0;
-    while (binaries[j] != '\0')
-    {
-        convertToBase64(binaries[j], f_base64Chars);
-        fputs(f_base64Chars, objectFile);
-        fputs("\n", objectFile);
-        j++;
-    }
-    
     return err_msg;
 }
 
@@ -303,23 +331,27 @@ int *data_op_divider(char *operands)
     int *val_ptr;
     int i;
     char *token, *err;
-
+    char curr_ops[100];
     val_ptr = (int *)malloc(1 * sizeof(int));
-
-    i = 1;
-    token = strtok(operands, ",");
+    strcpy(curr_ops, operands);
+    i = 0;
+    token = strtok(curr_ops, ",");
     while (token != NULL)
     {
-        val_ptr = realloc(val_ptr, i * sizeof(int));
-        val_ptr[i - 1] = strtol(token, &err, 10);
-        if (!err)
+        val_ptr = realloc(val_ptr, (i + 2) * sizeof(int));
+        val_ptr[i] = strtol(token, &err, 10);
+        if (err)
         {
+            i++;
+        }
+        else
+        {
+            free(val_ptr);
             return NULL;
         }
         token = strtok(NULL, ",");
-        i++;
     }
-    val_ptr[i - 1] = '\0';
+    val_ptr[i] = -3000;
 
     return val_ptr;
 }
@@ -327,19 +359,21 @@ int *string_op_divider(char *operands)
 {
     int *val_ptr;
     int i, size;
-    size = strlen(operands) - 1;
+    size = strlen(operands);
     if (operands[0] == '"' && operands[size - 1] == '"')
     {
-        val_ptr = (int *)malloc(size * sizeof(int));
+
+        val_ptr = (int *)malloc((size + 1) * sizeof(int));
 
         i = 0;
 
-        while (i < size - 1)
+        while (i < size - 2)
         {
             val_ptr[i] = (int)operands[i + 1];
             i++;
         }
         val_ptr[i] = '\0';
+        val_ptr[i + 1] = END_OF_BIN;
 
         return val_ptr;
     }
@@ -357,7 +391,7 @@ void convertToBase64(short decimalNumber, char *base64Chars)
     char base64Map[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     /* Make sure the decimalNumber is 12 bits.*/
-    if (decimalNumber < 0 || decimalNumber > 4095)
+    if (decimalNumber < -2048 || decimalNumber > 4095)
     {
         printf("The decimalNumber is not a 12 bits number.\n");
         exit(1);
@@ -371,6 +405,7 @@ void convertToBase64(short decimalNumber, char *base64Chars)
 
 void convertToBinary(short decimalNumber, char *binary)
 {
+
     int i;
     /* Make sure the decimalNumber is 12 bits. */
     if (decimalNumber < 0 || decimalNumber > 4095)
@@ -552,7 +587,8 @@ void delAllFiles(const char *name)
     }
 }
 
-void insertLabel(struct LabelNode **head, const char *label, int address) {
+void insertLabel(struct LabelNode **head, const char *label, int address)
+{
     struct LabelNode *newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
     strcpy(newNode->label, label);
     newNode->address = address;
@@ -560,8 +596,7 @@ void insertLabel(struct LabelNode **head, const char *label, int address) {
     *head = newNode;
 }
 
-
-void runFirsPass(FILE *file, LabelNode *labels) 
+void runFirsPass(FILE *file, LabelNode *labels)
 {
     char line[100], label[50], *directive, *str, *data, line_copy[100], *command;
     int currentAddress, result, strLength, num, count, i;
@@ -569,9 +604,8 @@ void runFirsPass(FILE *file, LabelNode *labels)
                               "jmp", "bne", "red", "prn", "jsr", "stop", "rts"};
     const int commandIncrements[] = {3, 3, 3, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1};
 
-
     file = fopen("source_file.am", "r");
-    if (file == NULL) 
+    if (file == NULL)
     {
         perror("Error opening file");
         exit(8);
@@ -579,12 +613,12 @@ void runFirsPass(FILE *file, LabelNode *labels)
     currentAddress = 100;
     labels = NULL;
 
-    while (fgets(line, sizeof(line), file)) 
+    while (fgets(line, sizeof(line), file))
     {
         result = sscanf(line, "%49s", label);
         strcpy(line_copy, line);
         directive = strtok(line_copy, " \t\n:");
-        if (result == 1 && label[strlen(label) - 1] == ':') 
+        if (result == 1 && label[strlen(label) - 1] == ':')
         {
             command = strtok(NULL, " ");
             label[strlen(label) - 1] = '\0';
@@ -594,63 +628,63 @@ void runFirsPass(FILE *file, LabelNode *labels)
         {
             command = directive;
         }
-        if (directive) 
+        if (directive)
         {
-            if (directive[0] != '.') 
+            if (directive[0] != '.')
             {
-                if (strstr(line, ".string")) 
+                if (strstr(line, ".string"))
                 {
                     str = strtok(NULL, "\"");
-                    if (str) 
+                    if (str)
                     {
                         strLength = strlen(str);
                         currentAddress += strLength + 1;
                     }
-                } 
-                else if (strstr(line, ".data")) 
+                }
+                else if (strstr(line, ".data"))
                 {
                     data = strchr(line, ' ');
                     strtok(data, " ");
                     data = strtok(NULL, " ");
-                    if (data) 
+                    if (data)
                     {
-                        while (1) 
+                        while (1)
                         {
                             count = sscanf(data, "%d", &num);
-                            if (count == 1) 
+                            if (count == 1)
                             {
                                 currentAddress += 1;
-                                while (*data != ',' && *data != '\0') 
+                                while (*data != ',' && *data != '\0')
                                 {
                                     data++;
                                 }
-                                if (*data == ',') 
+                                if (*data == ',')
                                 {
                                     data++;
-                                } 
-                                else 
+                                }
+                                else
                                 {
                                     break;
                                 }
-                            } 
-                            else 
+                            }
+                            else
                             {
                                 break;
                             }
                         }
                     }
-                } 
-                else 
+                }
+                else
                 {
-                    for (i = 0; i < 16; i++) 
+                    for (i = 0; i < 16; i++)
                     {
-                        if (strcmp(command, commands[i]) == 0) 
+                        if (strcmp(command, commands[i]) == 0)
                         {
                             currentAddress += commandIncrements[i];
                             break;
                         }
                     }
-                    if(i == 16)
+                    if (i == 16)
                     {
                         currentAddress += 1;
                     }
@@ -658,7 +692,6 @@ void runFirsPass(FILE *file, LabelNode *labels)
             }
         }
     }
-
 
     /*while (labels != NULL) {
         temp = labels;

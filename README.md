@@ -31,6 +31,6 @@
 3. Instruction statement: a statement that is seperated by: "\n" - instructuion and operands are seperated by spaces or tabs.
 4. Directive statement: a set of statements that are started with: "." - (.data, .string, .entry, .extern)
 
-- Numbers: the assemler supports positive and negative integers in decimal only.
+- Numbers: the assembler supports positive and negative integers in decimal only.
 
 

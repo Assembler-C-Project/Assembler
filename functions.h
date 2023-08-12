@@ -7,7 +7,7 @@
 #include "states.h"
 
 #define NUM_OF_REGS 8
-
+#define END_OF_BIN -3000
 #define IMMEDIATE_MAPPING 1
 #define DIRECT_MAPPING 3
 #define DIRECT_REG_MAPPING 5
@@ -48,26 +48,27 @@ typedef struct RegsType
 
 extern RegsType regs[8];
 
-typedef struct LabelNode {
+typedef struct LabelNode
+{
     char label[50];
     int address;
     struct LabelNode *next;
-}LabelNode;
+} LabelNode;
 
 int is_valid_label(char *label);
 int *method_OpDivider(char *operands, char **first_op, char **second_op);
 int search_data(char *operand);
-int functions(int command, char *operands, FILE* objectFile);
+int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars);
 void convertToBase64(short decimalNumber, char *base64Chars);
 void convertToBinary(short decimalNumber, char *binary);
-FILE* openEntFile(const char* name);
-void writeToEntFile(const char* filename, const char* line);
-void closeEntFile(const char* filename);
-FILE* openExtFile(const char* name);
-void writeToExtFile(const char* filename, const char* line);
-void closeExtFile(const char* filename);
-int* data_op_divider(char *operands);
+FILE *openEntFile(const char *name);
+void writeToEntFile(const char *filename, const char *line);
+void closeEntFile(const char *filename);
+FILE *openExtFile(const char *name);
+void writeToExtFile(const char *filename, const char *line);
+void closeExtFile(const char *filename);
+int *data_op_divider(char *operands);
 int *string_op_divider(char *operands);
 void delAllFiles(const char *fileName);
-void runFirsPass(FILE *file, LabelNode *labels);
+int runFirstPass(FILE *file, LabelNode *labels);
 #endif

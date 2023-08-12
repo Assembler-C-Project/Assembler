@@ -24,7 +24,7 @@ extern inst insts[4];
 
  
 
-void decoder(char *line, int line_num, FILE *objectFile);
+int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars);
 void RunDecoder(FILE *SourceFile, char *fileName);
 
 #endif
