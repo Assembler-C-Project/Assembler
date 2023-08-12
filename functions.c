@@ -393,6 +393,7 @@ FILE *openEntFile(const char *name)
     char filename[50];
     FILE *file;
     strcpy(filename, name);
+    strcat(filename, ".ent");
     file = fopen(filename, "r");
     if (file)
     {
@@ -439,6 +440,7 @@ FILE *openExtFile(const char *name)
     char filename[50];
     FILE *file;
     strcpy(filename, name);
+    strcat(filename, ".ext");
     file = fopen(filename, "r");
     if (file)
     {
@@ -563,7 +565,6 @@ void runFirsPass(FILE *file, LabelNode *labels)
 {
     char line[100], label[50], *directive, *str, *data, line_copy[100], *command;
     int currentAddress, result, strLength, num, count, i;
-    struct LabelNode *temp;
     const char *commands[] = {"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc", "dec",
                               "jmp", "bne", "red", "prn", "jsr", "stop", "rts"};
     const int commandIncrements[] = {3, 3, 3, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1};
@@ -573,7 +574,7 @@ void runFirsPass(FILE *file, LabelNode *labels)
     if (file == NULL) 
     {
         perror("Error opening file");
-        return 1;
+        exit(8);
     }
     currentAddress = 100;
     labels = NULL;
@@ -665,5 +666,5 @@ void runFirsPass(FILE *file, LabelNode *labels)
         free(temp);
     }*/
 
-return 0;
+return;
 }
