@@ -37,7 +37,5 @@ int main(int argc, char *argv[])
         
         RunDecoder(WorkFile, FileName);
     }
-    writeToEntFile("TestENT", "this is a test 123");
-    writeToExtFile("TestEXT", "this is a test 123");
     return 0;
 }
