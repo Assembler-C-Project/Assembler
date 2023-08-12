@@ -68,11 +68,9 @@ int functions(int command, char *operands, FILE *objectFile)
 
         if (!err_num && (second_meth == 1) && (command != CMP && command != PRN && command != STOP && command != RTS))
         {
-
             err_msg = ERR_DEST_TYPE;
             err_num++;
         }
-
         if (!err_num && first_meth != 3 && command == LEA)
         {
             err_msg = ERR_SRC_TYPE;
@@ -174,8 +172,15 @@ int functions(int command, char *operands, FILE *objectFile)
                 binaries = string_op_divider(operands);
             }
         }
+        else if (command == IS_ENTRY)
+        {
+            /* Check if doublicates with extern*/
+        }
+        else if (command == IS_EXTERN)
+        {
+            
+        }
     }
-
 
     j = 0;
     while (binaries[j] != '\0')
@@ -185,8 +190,7 @@ int functions(int command, char *operands, FILE *objectFile)
         fputs("\n", objectFile);
         j++;
     }
-
-
+    
     return err_msg;
 }
 
@@ -224,6 +228,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
     {
         num_of_ops++;
         first_value = strtol(*first_op, &err, 10);
+
         if (!strncmp((*first_op), "@r", 2))
         {
 
@@ -257,6 +262,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
     {
         num_of_ops++;
         second_value = strtol(*second_op, &err, 10);
+
         if (!strncmp((*second_op), "@r", 2))
         {
 
@@ -274,7 +280,6 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
                 printf("Err: Wrong register number\n");
             }
         }
-
         else if (!*err)
         {
             second_meth = IMMEDIATE_MAPPING;
@@ -490,7 +495,7 @@ int is_valid_label(char *label)
     }
 
     /* Check the rest of the characters*/
-    for ( i = 1; i < strlen(label); i++)
+    for (i = 1; i < strlen(label); i++)
     {
         if (!isalnum(label[i]) && label[i] != '_')
         {

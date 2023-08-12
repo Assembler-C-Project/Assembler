@@ -12,7 +12,7 @@ void decoder(char *line, int line_num, FILE *objectFile)
     int line_type;
     err_msg = -1;
     line_type = divider(line, &label, &comd, &operands);
-    if (!is_valid_label(label))
+    if (label!=NULL && !is_valid_label(label))
     {
         err_msg = ERR_INV_LABEL;
     }
@@ -20,7 +20,7 @@ void decoder(char *line, int line_num, FILE *objectFile)
     {
         printf("Error in line %d: %s\n", line_num, error[err_msg].message);
     }
-    printf("%s: %s %s", label, comd, operands);
+    printf("%s: %s %s\n", label, comd, operands);
     switch (line_type)
     {
     case IS_COMMAND:
@@ -68,7 +68,8 @@ void decoder(char *line, int line_num, FILE *objectFile)
         {
             printf("ERR: Wrong instruction found!\n");
         }
-
+        break;
+    case IS_COMMENT_EMPTY:
         break;
     }
 }
