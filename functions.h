@@ -70,5 +70,5 @@ void closeExtFile(const char *filename);
 int *data_op_divider(char *operands);
 int *string_op_divider(char *operands);
 void delAllFiles(const char *fileName);
-int runFirstPass(FILE *file, LabelNode *labels);
+void runFirstPass(FILE *file, LabelNode *labels);
 #endif

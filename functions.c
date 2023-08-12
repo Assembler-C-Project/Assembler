@@ -23,7 +23,6 @@ RegsType regs[] = {
 
 int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars)
 {
-    char **newBase64Chars;
     int IC;
     int DC;
     int *caching_methods_values;
@@ -37,9 +36,6 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
     int s_binaryint;
     int t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
-
-    char *f_base64Chars;
-    f_base64Chars = malloc(3 * sizeof(char));
 
     binaries = malloc(3 * sizeof(int));
     binaries[0] = binaries[1] = binaries[2] = binaries[3] = END_OF_BIN;
@@ -596,7 +592,7 @@ void insertLabel(struct LabelNode **head, const char *label, int address)
     *head = newNode;
 }
 
-void runFirsPass(FILE *file, LabelNode *labels)
+void runFirstPass(FILE *file, LabelNode *labels)
 {
     char line[100], label[50], *directive, *str, *data, line_copy[100], *command;
     int currentAddress, result, strLength, num, count, i;
@@ -699,5 +695,5 @@ void runFirsPass(FILE *file, LabelNode *labels)
         free(temp);
     }*/
 
-return;
+    return;
 }

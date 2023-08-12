@@ -103,8 +103,8 @@ void RunDecoder(FILE *SourceFile, char *fileName)
     i = 0;
     sprintf(IC_DC, "%d %d\n", IC, DC);
     fputs(IC_DC, objectFile);
-
-    while (base64Chars[i] != '\0')
+    
+    while (i<IC+DC)
     {
         fputs(base64Chars[i], objectFile);
         fputs("\n", objectFile);
