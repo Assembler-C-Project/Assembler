@@ -18,7 +18,6 @@ int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars)
         err_msg = ERR_INV_LABEL;
     }
 
-    printf("%s: %s %s\n", label, comd, operands);
     switch (line_type)
     {
     case IS_COMMAND:
@@ -37,7 +36,7 @@ int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars)
         }
         else
         {
-            printf("ERR: Wrong command found!\n");
+            return ERR_INV_CMD;
         }
         break;
     case IS_INSTRUCTION:
@@ -56,7 +55,7 @@ int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars)
         }
         else
         {
-            printf("ERR: Wrong instruction found!\n");
+            return ERR_INV_CMD;
         }
         break;
     case IS_COMMENT_EMPTY:
@@ -72,13 +71,14 @@ void RunDecoder(FILE *SourceFile, char *fileName)
     char line[MAX_LINE_LENGTH];
     int i;
     char **base64Chars;
-    int err_msg;
+    int err_msg, err_flag;
     int IC, DC;
     char IC_DC[30];
     base64Chars = (char **)malloc(3 * sizeof(char *));
     i = 0;
     IC = 0;
     DC = 0;
+    err_flag = 0;
     strtok(fileName, ".");
 
     fileName = strcat(fileName, ".ob");
@@ -96,18 +96,22 @@ void RunDecoder(FILE *SourceFile, char *fileName)
         err_msg = decoder(line, i, &IC, &DC, &base64Chars);
         if (err_msg != -1)
         {
+            err_flag = 1;
             printf("Error in line %d: %s\n", i + 1, error[err_msg].message);
         }
         i++;
     }
-    i = 0;
-    sprintf(IC_DC, "%d %d\n", IC, DC);
-    fputs(IC_DC, objectFile);
-    
-    while (i<IC+DC)
+    if (!err_flag)
     {
-        fputs(base64Chars[i], objectFile);
-        fputs("\n", objectFile);
-        i++;
+        i = 0;
+        sprintf(IC_DC, "%d %d\n", IC, DC);
+        fputs(IC_DC, objectFile);
+
+        while (i < IC + DC)
+        {
+            fputs(base64Chars[i], objectFile);
+            fputs("\n", objectFile);
+            i++;
+        }
     }
 }

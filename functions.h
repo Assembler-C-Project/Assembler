@@ -29,7 +29,8 @@ enum error_code
     ERR_0_OP,
     ERR_DEST_TYPE,
     ERR_SRC_TYPE,
-    ERR_INV_LABEL
+    ERR_INV_LABEL,
+    ERR_INV_CMD
 };
 
 typedef struct ErrorType
@@ -38,7 +39,7 @@ typedef struct ErrorType
     char *message;
 } ErrorType;
 
-extern ErrorType error[6];
+extern ErrorType error[7];
 
 typedef struct RegsType
 {
