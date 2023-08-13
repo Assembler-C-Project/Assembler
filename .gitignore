@@ -4,3 +4,7 @@
 /decoder.o
 /source_file.am
 /source_file.ob
+/assembler
+/*.o
+*.ext
+/*.ent
