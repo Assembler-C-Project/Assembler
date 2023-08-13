@@ -1,13 +1,16 @@
 #include "Interpreter.h"
 #include <string.h>
 #include <stdio.h>
-
+#include <stdlib.h>
 int divider(char *line, char **label, char **instruction, char **operands)
 {
     char *rest;
     int j, empty;
+    char *line_cpy;
+    line_cpy=(char *)malloc(strlen(line)*sizeof(char));
+    strcpy(line_cpy,line);
     /*Check if this is a comment line*/
-    if (!strncmp(line, ";", 1))
+    if (!strncmp(line_cpy, ";", 1))
     {
 
         label = NULL;
@@ -16,10 +19,10 @@ int divider(char *line, char **label, char **instruction, char **operands)
         return IS_COMMENT_EMPTY;
     }
     /*Discard comment in line*/
-    strtok(line, ";");
+    strtok(line_cpy, ";");
 
     /*Get the label*/
-    *label = strtok(line, ":");
+    *label = strtok(line_cpy, ":");
     rest = strtok(NULL, "");
     /*If there is no label*/
     if (rest == NULL || strlen(rest) == 0)

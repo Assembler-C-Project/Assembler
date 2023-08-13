@@ -55,13 +55,16 @@ typedef struct LabelNode
     int address;
     struct LabelNode *next;
 } LabelNode;
-
+typedef struct mem_word
+{
+    char *name;
+    int value;
+} mem_word;
 int is_valid_label(char *label);
-int *method_OpDivider(char *operands, char **first_op, char **second_op);
-int search_data(char *operand);
-int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars);
+int *method_OpDivider(char *operands, char **first_op, char **second_op,mem_word *label_lst);
+int search_data(char *operand,mem_word *label_lst);
+int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars, mem_word *label_lst,char *filename);
 void convertToBase64(short decimalNumber, char *base64Chars);
-void convertToBinary(short decimalNumber, char *binary);
 FILE *openEntFile(const char *name);
 void writeToEntFile(const char *filename, const char *line);
 void closeEntFile(const char *filename);
@@ -71,5 +74,6 @@ void closeExtFile(const char *filename);
 int *data_op_divider(char *operands);
 int *string_op_divider(char *operands);
 void delAllFiles(const char *fileName);
-void runFirstPass(FILE *file, LabelNode *labels);
+void delextFiles(const char *name);
+
 #endif

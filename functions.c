@@ -8,9 +8,9 @@ ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
                      {ERR_DEST_TYPE, "Destination operand type error\n"},
                      {ERR_SRC_TYPE, "Source operand type error\n"},
                      {ERR_INV_LABEL, "Invalid label name\n"},
-                     {ERR_INV_CMD,"Command/Instruction not found!\n"}                     
-                     
-                     };
+                     {ERR_INV_CMD, "Command/Instruction not found!\n"}
+
+};
 
 RegsType regs[] = {
     {"r0", 0},
@@ -24,31 +24,30 @@ RegsType regs[] = {
 
 };
 
-int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars)
+int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars, mem_word *label_lst, char *filename)
 {
     int IC;
     int DC;
     int *caching_methods_values;
     int err_msg;
     int err_num;
-    int j, i;
+    int j, i,temp_sec_val,temp_first_val;
     char *first_op;
     char *second_op;
     int *binaries;
-    int f_binaryint;
-    int s_binaryint;
-    int t_binaryint;
+    int f_binaryint, s_binaryint, t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
-
+    char ext_line[20];
     binaries = malloc(3 * sizeof(int));
     binaries[0] = binaries[1] = binaries[2] = binaries[3] = END_OF_BIN;
+    f_binaryint = s_binaryint = t_binaryint = END_OF_BIN;
     err_num = 0;
     err_msg = -1;
     IC = 0;
     DC = 0;
     if (command < 16)
     {
-        caching_methods_values = method_OpDivider(operands, &first_op, &second_op);
+        caching_methods_values = method_OpDivider(operands, &first_op, &second_op, label_lst);
         first_meth = caching_methods_values[0];
         first_value = caching_methods_values[1];
         second_meth = caching_methods_values[2];
@@ -83,19 +82,20 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
             err_num++;
         }
 
-        f_binaryint = 0;
-        s_binaryint = 0;
-        t_binaryint = 0;
-
         if (!err_num)
         {
+            f_binaryint = 0;
             f_binaryint |= (first_meth << SOURCE_OPERAND_SHIFT);
             f_binaryint |= (command << OPCODE_SHIFT);
             f_binaryint |= (second_meth << DESTINATION_OPERAND_SHIFT);
+           
             binaries[0] = f_binaryint;
             IC++;
-            if (first_meth || second_meth)
+
+            if ((first_meth || second_meth))
             {
+                s_binaryint = 0;
+
                 if (first_meth == 5)
                 {
                     s_binaryint |= (first_value << SOURCE_REG_SHIFT);
@@ -106,10 +106,15 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
 
                     else if (second_meth == 3 || second_meth == 1)
                     {
+                        t_binaryint = 0;
                         t_binaryint |= (second_value << 2);
                         if (second_meth == 3)
                         {
                             t_binaryint |= 2;
+                            if (second_value == -4000)
+                            {
+                                t_binaryint = 1;
+                            }
                         }
                         binaries[2] = t_binaryint;
                         IC++;
@@ -123,19 +128,29 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                     if (first_meth == 3)
                     {
                         s_binaryint |= 2;
+                        if (second_value == -4000)
+                        {
+                            s_binaryint = 1;
+                        }
                     }
                     if (second_meth == 5)
                     {
+                        t_binaryint = 0;
                         t_binaryint |= (second_value << DESTINATION_REG_SHIFT);
                         binaries[2] = t_binaryint;
                         IC++;
                     }
                     else if (second_meth == 3 || second_meth == 1)
                     {
+                        t_binaryint = 0;
                         t_binaryint |= (second_value << 2);
                         if (second_meth == 3)
                         {
                             t_binaryint |= 2;
+                            if (second_value == -4000)
+                            {
+                                t_binaryint = 1;
+                            }
                         }
                         binaries[2] = t_binaryint;
                         IC++;
@@ -155,11 +170,29 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                         if (second_meth == 3)
                         {
                             s_binaryint |= 2;
+                            if (second_value == -4000)
+                            {
+                                s_binaryint = 1;
+                            }
                         }
                     }
                     binaries[1] = s_binaryint;
                     IC++;
                 }
+            }
+            
+            if (first_value == -4000 || second_value == -4000)
+            {
+
+                if (first_value == -4000)
+                {
+                    sprintf(ext_line, "%s %d", first_op, 101 + *curr_DC + DC + *curr_IC + DC);
+                }
+                else
+                {
+                    sprintf(ext_line, "%s %d", second_op, 101 + *curr_DC + DC + *curr_IC + DC);
+                }
+                writeToExtFile(filename, ext_line);
             }
         }
     }
@@ -206,23 +239,20 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
     j = *curr_IC + *curr_DC;
     *curr_IC += IC;
     *curr_DC += DC;
-
     *base64Chars = (char **)realloc(*base64Chars, (*curr_IC + *curr_DC + 1) * sizeof(char *));
-
     i = 0;
     while (binaries[i] != END_OF_BIN)
     {
-        (*base64Chars)[j] = (char *)malloc(4 * sizeof(char));
+        (*base64Chars)[j] = (char *)malloc(3 * sizeof(char));
         convertToBase64(binaries[i], (*base64Chars)[j]);
         j++;
         i++;
     }
-
     return err_msg;
 }
 
 /* Caching method and operand divider function*/
-int *method_OpDivider(char *operands, char **first_op, char **second_op)
+int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_word *label_lst)
 {
     int *result;
     char *err;
@@ -235,7 +265,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
     int num_of_ops;
     result = malloc(sizeof(int) * 5);
     num_of_ops = 0;
-    first_meth = second_meth = first_value = second_value = 0;
+    first_meth = second_meth = first_value = second_value = END_OF_BIN;
 
     /* Divider*/
     *first_op = strtok(operands, ",");
@@ -281,7 +311,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
         else
         {
             first_meth = DIRECT_MAPPING;
-            first_value = search_data(*first_op);
+            first_value = search_data(*first_op, label_lst);
         }
     }
 
@@ -314,7 +344,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op)
         else
         {
             second_meth = DIRECT_MAPPING;
-            second_value = search_data(*second_op);
+            second_value = search_data(*second_op, label_lst);
         }
     }
 
@@ -379,10 +409,20 @@ int *string_op_divider(char *operands)
     return NULL;
 }
 
-int search_data(char *operand)
+int search_data(char *operand, mem_word *label_lst)
 {
-    return 117;
-    /*-returns a value from the data sheet*/
+    int i = 0;
+
+    while (label_lst[i].value != '\0')
+    {
+        if (!strcmp(label_lst[i].name, operand) && label_lst[i].value != -1)
+        {
+            return label_lst[i].value;
+        }
+        i++;
+    }
+
+    return -4000;
 }
 
 void convertToBase64(short decimalNumber, char *base64Chars)
@@ -400,26 +440,6 @@ void convertToBase64(short decimalNumber, char *base64Chars)
     base64Chars[0] = base64Map[(decimalNumber & 0xFC0) >> 6];
     base64Chars[1] = base64Map[decimalNumber & 0x3F];
     base64Chars[2] = '\0';
-}
-
-void convertToBinary(short decimalNumber, char *binary)
-{
-
-    int i;
-    /* Make sure the decimalNumber is 12 bits. */
-    if (decimalNumber < 0 || decimalNumber > 4095)
-    {
-        printf("The decimalNumber is not a 12 bits number.\n");
-        exit(1);
-    }
-
-    binary[12] = '\0';
-
-    /* Convert each bit to binary, starting from the highest (11th) bit. */
-    for (i = 11; i >= 0; --i)
-    {
-        binary[11 - i] = ((decimalNumber & (1 << i)) != 0) ? '1' : '0';
-    }
 }
 
 FILE *openEntFile(const char *name)
@@ -585,118 +605,21 @@ void delAllFiles(const char *name)
         remove(ext);
     }
 }
-
-void insertLabel(struct LabelNode **head, const char *label, int address)
+void delextFiles(const char *name)
 {
-    struct LabelNode *newNode = (struct LabelNode *)malloc(sizeof(struct LabelNode));
-    strcpy(newNode->label, label);
-    newNode->address = address;
-    newNode->next = *head;
-    *head = newNode;
-}
+    char fileName[50];
 
-void runFirstPass(FILE *file, LabelNode *labels)
-{
-    char line[100], label[50], *directive, *str, *data, line_copy[100], *command;
-    int currentAddress, result, strLength, num, count, i;
-    const char *commands[] = {"mov", "cmp", "add", "sub", "not", "clr", "lea", "inc", "dec",
-                              "jmp", "bne", "red", "prn", "jsr", "stop", "rts"};
-    const int commandIncrements[] = {3, 3, 3, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1};
+    FILE *extFile;
+    char ext[50];
 
-    file = fopen("source_file.am", "r");
-    if (file == NULL)
+    strcpy(fileName, name);
+
+    strcpy(ext, fileName);
+    strcat(ext, ".ext");
+
+    if ((extFile = fopen(ext, "r")) != NULL)
     {
-        perror("Error opening file");
-        exit(8);
+        fclose(extFile);
+        remove(ext);
     }
-    currentAddress = 100;
-    labels = NULL;
-
-    while (fgets(line, sizeof(line), file))
-    {
-        result = sscanf(line, "%49s", label);
-        strcpy(line_copy, line);
-        directive = strtok(line_copy, " \t\n:");
-        if (result == 1 && label[strlen(label) - 1] == ':')
-        {
-            command = strtok(NULL, " ");
-            label[strlen(label) - 1] = '\0';
-            insertLabel(&labels, label, currentAddress);
-        }
-        else
-        {
-            command = directive;
-        }
-        if (directive)
-        {
-            if (directive[0] != '.')
-            {
-                if (strstr(line, ".string"))
-                {
-                    str = strtok(NULL, "\"");
-                    if (str)
-                    {
-                        strLength = strlen(str);
-                        currentAddress += strLength + 1;
-                    }
-                }
-                else if (strstr(line, ".data"))
-                {
-                    data = strchr(line, ' ');
-                    strtok(data, " ");
-                    data = strtok(NULL, " ");
-                    if (data)
-                    {
-                        while (1)
-                        {
-                            count = sscanf(data, "%d", &num);
-                            if (count == 1)
-                            {
-                                currentAddress += 1;
-                                while (*data != ',' && *data != '\0')
-                                {
-                                    data++;
-                                }
-                                if (*data == ',')
-                                {
-                                    data++;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (i = 0; i < 16; i++)
-                    {
-                        if (strcmp(command, commands[i]) == 0)
-                        {
-                            currentAddress += commandIncrements[i];
-                            break;
-                        }
-                    }
-                    if (i == 16)
-                    {
-                        currentAddress += 1;
-                    }
-                }
-            }
-        }
-    }
-
-    /*while (labels != NULL) {
-        temp = labels;
-        labels = labels->next;
-        free(temp);
-    }*/
-
-    return;
 }

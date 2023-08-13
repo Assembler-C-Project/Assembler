@@ -4,7 +4,7 @@ cmd cmds[] =
     {{"mov", MOV}, {"cmp", CMP}, {"add", ADD}, {"sub", SUB}, {"not", NOT}, {"clr", CLR}, {"lea", LEA}, {"inc", INC}, {"dec", DEC}, {"jmp", JMP}, {"bne", BNE}, {"red", RED}, {"prn", PRN}, {"jsr", JSR}, {"rts", RTS}, {"stop", STOP}};
 inst insts[] = {
     {".data", IS_DATA}, {".string", IS_STRING}, {".entry", IS_ENTRY}, {".extern", IS_EXTERN}};
-int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars)
+int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars, mem_word **label_lst, char *filename)
 {
 
     int i;
@@ -32,7 +32,7 @@ int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars)
         }
         if (i != 16)
         {
-            err_msg = functions(cmds[i].value, operands, IC, DC, base64Chars);
+            err_msg = functions(cmds[i].value, operands, IC, DC, base64Chars, *label_lst, filename);
         }
         else
         {
@@ -51,7 +51,7 @@ int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars)
         }
         if (i != 4)
         {
-            err_msg = functions(insts[i].value, operands, IC, DC, base64Chars);
+            err_msg = functions(insts[i].value, operands, IC, DC, base64Chars, *label_lst, filename);
         }
         else
         {
@@ -66,21 +66,28 @@ int decoder(char *line, int line_num, int *IC, int *DC, char ***base64Chars)
 
 void RunDecoder(FILE *SourceFile, char *fileName)
 {
-    LabelNode *lables = NULL;
     FILE *objectFile;
+    mem_word *label_lst;
     char line[MAX_LINE_LENGTH];
-    int i;
+    int i, j, label_cnt;
     char **base64Chars;
     int err_msg, err_flag;
     int IC, DC;
     char IC_DC[30];
+    char *label, *comd, *operands;
+    char **lines;
+
+    char ext_file[10];
+    label_lst = malloc(10 * sizeof(mem_word));
+    lines = malloc(10 * sizeof(line));
     base64Chars = (char **)malloc(3 * sizeof(char *));
     i = 0;
     IC = 0;
     DC = 0;
     err_flag = 0;
+    label_cnt = 0;
     strtok(fileName, ".");
-
+    strcpy(ext_file, fileName);
     fileName = strcat(fileName, ".ob");
     if ((objectFile = fopen(fileName, "w")) == NULL)
     {
@@ -88,12 +95,55 @@ void RunDecoder(FILE *SourceFile, char *fileName)
         return;
     }
 
-    printf("starting\n");
-    runFirstPass(SourceFile, lables);
     rewind(SourceFile);
+    j = 0;
     while (fgets(line, MAX_LINE_LENGTH, SourceFile) != NULL)
     {
-        err_msg = decoder(line, i, &IC, &DC, &base64Chars);
+
+        if (j > 10)
+        {
+            lines = realloc(lines, (j + 2) * sizeof(line));
+        }
+        lines[j] = malloc(sizeof(line));
+        strcpy(lines[j], line);
+        divider(line, &label, &comd, &operands);
+        if (label_cnt > 10)
+        {
+            label_lst = realloc(label_lst, (label_cnt + 2) * sizeof(mem_word));
+        }
+        if (!strcmp(comd, ".extern"))
+        {
+            label_lst[label_cnt].name = (char *)malloc(strlen(operands) + 1);
+            strcpy(label_lst[label_cnt].name, operands);
+            label_lst[label_cnt].value = -1;
+            label_cnt++;
+            label_lst[label_cnt].value = 0;
+        }
+
+        if (label != NULL)
+        {
+
+            label_lst[label_cnt].name = (char *)malloc(strlen(label) + 1);
+            strcpy(label_lst[label_cnt].name, label);
+            label_lst[label_cnt].value = IC + DC + 100;
+            label_cnt++;
+            label_lst[label_cnt].value = 0;
+        }
+        decoder(line, j, &IC, &DC, &base64Chars, &label_lst, ext_file);
+
+        j++;
+    }
+
+   
+        delextFiles(ext_file);
+    IC = 0;
+    DC = 0;
+    i = 0;
+    while (i < j)
+    {
+
+        err_msg = decoder(lines[i], i, &IC, &DC, &base64Chars, &label_lst, ext_file);
+
         if (err_msg != -1)
         {
             err_flag = 1;
@@ -101,6 +151,7 @@ void RunDecoder(FILE *SourceFile, char *fileName)
         }
         i++;
     }
+
     if (!err_flag)
     {
         i = 0;
@@ -113,5 +164,6 @@ void RunDecoder(FILE *SourceFile, char *fileName)
             fputs("\n", objectFile);
             i++;
         }
+        printf("Done!\n");
     }
 }
