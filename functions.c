@@ -31,7 +31,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
     int *caching_methods_values;
     int err_msg;
     int err_num;
-    int j, i,temp_sec_val,temp_first_val;
+    int j, i;
     char *first_op;
     char *second_op;
     int *binaries;

@@ -111,7 +111,7 @@ void RunDecoder(FILE *SourceFile, char *fileName)
         {
             label_lst = realloc(label_lst, (label_cnt + 2) * sizeof(mem_word));
         }
-        if (!strcmp(comd, ".extern"))
+        if (comd!=NULL && !strcmp(comd, ".extern"))
         {
             label_lst[label_cnt].name = (char *)malloc(strlen(operands) + 1);
             strcpy(label_lst[label_cnt].name, operands);
