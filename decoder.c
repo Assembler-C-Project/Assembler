@@ -111,7 +111,7 @@ void RunDecoder(FILE *SourceFile, char *fileName)
         {
             label_lst = realloc(label_lst, (label_cnt + 2) * sizeof(mem_word));
         }
-        if (comd!=NULL && !strcmp(comd, ".extern"))
+        if (comd != NULL && !strcmp(comd, ".extern"))
         {
             label_lst[label_cnt].name = (char *)malloc(strlen(operands) + 1);
             strcpy(label_lst[label_cnt].name, operands);
@@ -134,8 +134,9 @@ void RunDecoder(FILE *SourceFile, char *fileName)
         j++;
     }
 
-   
-        delextFiles(ext_file);
+    delextFiles(ext_file);
+    delentFiles(ext_file);
+
     IC = 0;
     DC = 0;
     i = 0;
@@ -143,7 +144,6 @@ void RunDecoder(FILE *SourceFile, char *fileName)
     {
 
         err_msg = decoder(lines[i], i, &IC, &DC, &base64Chars, &label_lst, ext_file);
-
         if (err_msg != -1)
         {
             err_flag = 1;

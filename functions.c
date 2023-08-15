@@ -8,7 +8,9 @@ ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
                      {ERR_DEST_TYPE, "Destination operand type error\n"},
                      {ERR_SRC_TYPE, "Source operand type error\n"},
                      {ERR_INV_LABEL, "Invalid label name\n"},
-                     {ERR_INV_CMD, "Command/Instruction not found!\n"}
+                     {ERR_INV_CMD, "Command/Instruction not found!\n"},
+                     {ERR_INV_ENT, "Invalid entry name"},
+                     {ERR_VAR_NF, "Variable not found"}
 
 };
 
@@ -37,7 +39,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
     int *binaries;
     int f_binaryint, s_binaryint, t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
-    char ext_line[20];
+    char ext_line[20], ent_line[20];
     binaries = malloc(3 * sizeof(int));
     binaries[0] = binaries[1] = binaries[2] = binaries[3] = END_OF_BIN;
     f_binaryint = s_binaryint = t_binaryint = END_OF_BIN;
@@ -88,7 +90,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
             f_binaryint |= (first_meth << SOURCE_OPERAND_SHIFT);
             f_binaryint |= (command << OPCODE_SHIFT);
             f_binaryint |= (second_meth << DESTINATION_OPERAND_SHIFT);
-           
+
             binaries[0] = f_binaryint;
             IC++;
 
@@ -111,7 +113,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                         if (second_meth == 3)
                         {
                             t_binaryint |= 2;
-                            if (second_value == -4000)
+                            if (!second_value)
                             {
                                 t_binaryint = 1;
                             }
@@ -128,7 +130,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                     if (first_meth == 3)
                     {
                         s_binaryint |= 2;
-                        if (second_value == -4000)
+                        if (!first_value)
                         {
                             s_binaryint = 1;
                         }
@@ -147,7 +149,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                         if (second_meth == 3)
                         {
                             t_binaryint |= 2;
-                            if (second_value == -4000)
+                            if (!second_value)
                             {
                                 t_binaryint = 1;
                             }
@@ -170,7 +172,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                         if (second_meth == 3)
                         {
                             s_binaryint |= 2;
-                            if (second_value == -4000)
+                            if (!second_value)
                             {
                                 s_binaryint = 1;
                             }
@@ -180,19 +182,25 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                     IC++;
                 }
             }
-            
-            if (first_value == -4000 || second_value == -4000)
-            {
 
-                if (first_value == -4000)
+            if (first_meth == DIRECT_MAPPING || second_meth == DIRECT_MAPPING)
+            {
+                if (first_value == 0 || second_value == 0)
                 {
-                    sprintf(ext_line, "%s %d", first_op, 101 + *curr_DC + DC + *curr_IC + DC);
+                    if (first_value == 0 && first_meth == DIRECT_MAPPING)
+                    {
+                        sprintf(ext_line, "%s %d", first_op, 101 + *curr_DC + DC + *curr_IC + DC);
+                    }
+                    if (second_value == 0 && second_meth == DIRECT_MAPPING)
+                    {
+                        sprintf(ext_line, "%s %d", second_op, 101 + *curr_DC + DC + *curr_IC + DC);
+                    }
+                    writeToExtFile(filename, ext_line);
                 }
-                else
+                if (first_value == -1 || second_value == -1)
                 {
-                    sprintf(ext_line, "%s %d", second_op, 101 + *curr_DC + DC + *curr_IC + DC);
+                    err_msg = ERR_VAR_NF;
                 }
-                writeToExtFile(filename, ext_line);
             }
         }
     }
@@ -225,10 +233,35 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
         else if (command == IS_ENTRY)
         {
             /* Check if doublicates with extern*/
+            j = 0;
+            while (label_lst[j].value != '\0')
+            {
+                if (!strcmp(operands, label_lst[j].name) && label_lst[j].value != -1)
+                {
+                    sprintf(ent_line, "%s %d", label_lst[j].name, label_lst[j].value);
+                    writeToEntFile(filename, ent_line);
+                    break;
+                }
+                j++;
+            }
+            if (j != 0 && label_lst[j].value == '\0')
+            {
+                err_msg = ERR_INV_ENT;
+            }
         }
         else if (command == IS_EXTERN)
         {
+            j = 0;
+            while (label_lst[j].value != '\0')
+            {
+                if (!strcmp(operands, label_lst[j].name) && label_lst[j].value != -1)
+                {
+                    err_msg = ERR_INV_LABEL;
+                }
+                j++;
+            }
         }
+
         j = 0;
         while (binaries[j] != END_OF_BIN)
         {
@@ -415,14 +448,21 @@ int search_data(char *operand, mem_word *label_lst)
 
     while (label_lst[i].value != '\0')
     {
-        if (!strcmp(label_lst[i].name, operand) && label_lst[i].value != -1)
+        if (!strcmp(label_lst[i].name, operand))
         {
-            return label_lst[i].value;
+            if (label_lst[i].value == -1)
+            {
+                return 0;
+            }
+            else
+            {
+                return label_lst[i].value;
+            }
         }
         i++;
     }
-
-    return -4000;
+    /*** If var is not defined */
+    return -1;
 }
 
 void convertToBase64(short decimalNumber, char *base64Chars)
@@ -621,5 +661,23 @@ void delextFiles(const char *name)
     {
         fclose(extFile);
         remove(ext);
+    }
+}
+void delentFiles(const char *name)
+{
+    char fileName[50];
+
+    FILE *entFile;
+    char ent[50];
+
+    strcpy(fileName, name);
+
+    strcpy(ent, fileName);
+    strcat(ent, ".ent");
+
+    if ((entFile = fopen(ent, "r")) != NULL)
+    {
+        fclose(entFile);
+        remove(ent);
     }
 }

@@ -30,7 +30,9 @@ enum error_code
     ERR_DEST_TYPE,
     ERR_SRC_TYPE,
     ERR_INV_LABEL,
-    ERR_INV_CMD
+    ERR_INV_CMD,
+    ERR_INV_ENT,
+    ERR_VAR_NF
 };
 
 typedef struct ErrorType
@@ -39,7 +41,7 @@ typedef struct ErrorType
     char *message;
 } ErrorType;
 
-extern ErrorType error[7];
+extern ErrorType error[9];
 
 typedef struct RegsType
 {
@@ -75,5 +77,5 @@ int *data_op_divider(char *operands);
 int *string_op_divider(char *operands);
 void delAllFiles(const char *fileName);
 void delextFiles(const char *name);
-
+void delentFiles(const char *name);
 #endif
