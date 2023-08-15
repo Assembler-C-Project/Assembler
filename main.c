@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     FILE *WorkFile;
     char *FileName;
     int i;
-
+    printf("Starting!\n");
     for (i = 1; i < argc; i++)
     {
         if ((SourceFile = fopen(*++argv, "r")) == NULL)
