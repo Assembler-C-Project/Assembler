@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "interpreter.h": "c",
-        "states.h": "c"
+        "states.h": "c",
+        "string.h": "c",
+        "preassem.h": "c"
     }
 }

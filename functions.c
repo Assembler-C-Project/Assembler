@@ -1,7 +1,12 @@
+/*functions.c
+Written by: Nadeem Kabha and Elad Eytan Feldman
+Date: 16/08/23
+Prepose: define various utility functions and data structures used in an assembly language decoder program, including error messages, register mappings, operand caching methods, binary conversion, file handling for entry and external files, data and string operand division, and deletion of specific files related to assembly output.*/
 #include "functions.h"
 /*caching_methods_values=[ 0:first_operand_meth   1:first_operand_value,
                            2:second_operand_meth  3:second_operand_value 4:number of operands]*/
 
+/* Error messages for different issues */
 ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
                      {ERR_1_OP, "Expected 1 operand\n"},
                      {ERR_0_OP, "Command doesn't take operands\n"},
@@ -14,6 +19,7 @@ ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
 
 };
 
+/* Register names and their corresponding numbers */
 RegsType regs[] = {
     {"r0", 0},
     {"r1", 1},
@@ -40,6 +46,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
     int f_binaryint, s_binaryint, t_binaryint;
     int first_meth, second_meth, first_value, second_value, num_of_ops;
     char ext_line[20], ent_line[20];
+    /* Initializing variables */
     binaries = malloc(3 * sizeof(int));
     binaries[0] = binaries[1] = binaries[2] = binaries[3] = END_OF_BIN;
     f_binaryint = s_binaryint = t_binaryint = END_OF_BIN;
@@ -49,6 +56,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
     DC = 0;
     if (command < 16)
     {
+        /* Divide operands into caching methods */
         caching_methods_values = method_OpDivider(operands, &first_op, &second_op, label_lst);
         first_meth = caching_methods_values[0];
         first_value = caching_methods_values[1];
@@ -56,6 +64,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
         second_value = caching_methods_values[3];
         num_of_ops = caching_methods_values[4];
 
+        /* Check for various errors based on the command and operands */
         if (!err_num && num_of_ops != 2 && ((command >= MOV && command <= SUB) || command == LEA))
         {
             err_msg = ERR_2_OPS;
@@ -73,6 +82,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
             err_num++;
         }
 
+        /* Check operand types and handle errors */
         if (!err_num && (second_meth == 1) && (command != CMP && command != PRN && command != STOP && command != RTS))
         {
             err_msg = ERR_DEST_TYPE;
@@ -84,8 +94,10 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
             err_num++;
         }
 
+        /* If no errors, proceed to create binaries */
         if (!err_num)
         {
+            /* Construct the first part of the binary representation */
             f_binaryint = 0;
             f_binaryint |= (first_meth << SOURCE_OPERAND_SHIFT);
             f_binaryint |= (command << OPCODE_SHIFT);
@@ -94,6 +106,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
             binaries[0] = f_binaryint;
             IC++;
 
+            /* Handle various cases for different operand combinations */
             if ((first_meth || second_meth))
             {
                 s_binaryint = 0;
@@ -182,7 +195,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                     IC++;
                 }
             }
-
+            /* Handle cases involving direct mapping */
             if (first_meth == DIRECT_MAPPING || second_meth == DIRECT_MAPPING)
             {
                 if (first_value == 0 || second_value == 0)
@@ -204,6 +217,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
             }
         }
     }
+    /* Handle non-instruction commands like data, string, entry, and extern */
     else
     {
         if (command == IS_DATA)
@@ -296,11 +310,13 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
     int first_value;
     int second_value;
     int num_of_ops;
+
+    /* Allocate memory to store the result */
     result = malloc(sizeof(int) * 5);
     num_of_ops = 0;
     first_meth = second_meth = first_value = second_value = END_OF_BIN;
 
-    /* Divider*/
+    /* Divide the operands into first and second operands */
     *first_op = strtok(operands, ",");
     rest = strtok(NULL, " ");
     if (rest == NULL)
@@ -308,20 +324,20 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
         rest = *first_op;
         *first_op = NULL;
     }
-
     *second_op = strtok(rest, " ");
 
-    /*Caching Method*/
+    /* Determine the caching methods and values for operands */
     first_meth = 0;
     second_meth = 0;
+    
     if (*first_op)
     {
         num_of_ops++;
         first_value = strtol(*first_op, &err, 10);
 
+        /* Check if the operand is a direct register */
         if (!strncmp((*first_op), "@r", 2))
         {
-
             first_meth = DIRECT_REG_MAPPING;
             for (i = 0; i < NUM_OF_REGS; i++)
             {
@@ -336,11 +352,12 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
                 printf("Err: Wrong register number\n");
             }
         }
-
+        /* Check if the operand is an immediate value */
         else if (!*err)
         {
             first_meth = IMMEDIATE_MAPPING;
         }
+        /* Otherwise, assume it's a direct mapping and search for the value */
         else
         {
             first_meth = DIRECT_MAPPING;
@@ -348,6 +365,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
         }
     }
 
+    /* Similar checks and assignments for the second operand */
     if (*second_op)
     {
         num_of_ops++;
@@ -380,7 +398,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
             second_value = search_data(*second_op, label_lst);
         }
     }
-
+    /* Store the results in the 'result' array and return it */
     result[0] = first_meth;
     result[1] = first_value;
     result[2] = second_meth;
@@ -394,76 +412,105 @@ int *data_op_divider(char *operands)
     int i;
     char *token, *err;
     char curr_ops[100];
+
+    /* Allocate memory for the integer values array */
     val_ptr = (int *)malloc(1 * sizeof(int));
     strcpy(curr_ops, operands);
     i = 0;
+
+    /* Tokenize the input string and extract integer values */
     token = strtok(curr_ops, ",");
     while (token != NULL)
     {
+        /* Reallocate memory to store the extracted value */
         val_ptr = realloc(val_ptr, (i + 2) * sizeof(int));
+
+        /* Convert token to integer and store in the array */
         val_ptr[i] = strtol(token, &err, 10);
+        
+        /* Check for parsing error */
         if (err)
         {
             i++;
         }
         else
         {
+            /* Free memory and return NULL if parsing error occurs */
             free(val_ptr);
             return NULL;
         }
+        
         token = strtok(NULL, ",");
     }
+
+    /* Mark the end of the integer values array */
     val_ptr[i] = -3000;
 
     return val_ptr;
 }
+
 int *string_op_divider(char *operands)
 {
     int *val_ptr;
     int i, size;
     size = strlen(operands);
+
+    /* Check if the string is enclosed in double quotes */
     if (operands[0] == '"' && operands[size - 1] == '"')
     {
-
+        /* Allocate memory for the integer values array */
         val_ptr = (int *)malloc((size + 1) * sizeof(int));
 
         i = 0;
 
+        /* Extract character values from the string and store them as integers */
         while (i < size - 2)
         {
             val_ptr[i] = (int)operands[i + 1];
             i++;
         }
+
+        /* Mark the end of the integer values array */
         val_ptr[i] = '\0';
         val_ptr[i + 1] = END_OF_BIN;
 
         return val_ptr;
     }
+    
+    /* Return NULL if the input string is not a valid enclosed string */
     return NULL;
 }
+
 
 int search_data(char *operand, mem_word *label_lst)
 {
     int i = 0;
 
+    /* Iterate through the label list to find the specified operand */
     while (label_lst[i].value != '\0')
     {
+        /* Check if the operand matches the current label */
         if (!strcmp(label_lst[i].name, operand))
         {
+            /* Check if the label value indicates an undefined variable */
             if (label_lst[i].value == -1)
             {
+                /* Return 0 to indicate an undefined variable */
                 return 0;
             }
             else
             {
+                /* Return the value associated with the label */
                 return label_lst[i].value;
             }
         }
         i++;
     }
-    /*** If var is not defined */
+    
+    /* Return -1 if the operand is not found in the label list */
     return -1;
 }
+
 
 void convertToBase64(short decimalNumber, char *base64Chars)
 {
@@ -486,23 +533,32 @@ FILE *openEntFile(const char *name)
 {
     char filename[50];
     FILE *file;
+
+    /* Create the filename for the .ent file by appending ".ent" to the input name */
     strcpy(filename, name);
     strcat(filename, ".ent");
+
+    /* Try to open the file in read mode to check if it exists */
     file = fopen(filename, "r");
+
     if (file)
     {
-        /* If the file exists, close it and reopen it in append mode */
+        /* If the file exists, close it */
         fclose(file);
+
+        /* Reopen the file in append mode to add content */
         file = fopen(filename, "a");
     }
     else
     {
-        /* If the file doesn't exist, open it in write mode to create it */
+        /* If the file doesn't exist, create it by opening it in write mode */
         file = fopen(filename, "w");
     }
 
+    /* Return the file pointer, either for appending or creating the file */
     return file;
 }
+
 
 void writeToEntFile(const char *filename, const char *line)
 {
@@ -510,12 +566,13 @@ void writeToEntFile(const char *filename, const char *line)
 
     if (file)
     {
+        /* Write the provided line to the file followed by a newline character */
         fprintf(file, "%s\n", line);
-        fclose(file);
+        fclose(file);  /* Close the file after writing */
     }
     else
     {
-        printf("Failed to open the file.\n");
+        printf("Failed to open the file.\n");  /* Print an error message if file couldn't be opened */
     }
 }
 
@@ -525,9 +582,11 @@ void closeEntFile(const char *filename)
 
     if (file != NULL)
     {
-        fclose(file);
+        fclose(file);  /* Close the file if it was successfully opened */
     }
+    /* If the file couldn't be opened, it might not need to be closed, so no error message is provided */
 }
+
 
 FILE *openExtFile(const char *name)
 {
@@ -557,12 +616,13 @@ void writeToExtFile(const char *filename, const char *line)
 
     if (file)
     {
+        /* Write the provided line to the file followed by a newline character */
         fprintf(file, "%s\n", line);
-        fclose(file);
+        fclose(file);  /* Close the file after writing */
     }
     else
     {
-        printf("Failed to open the file.\n");
+        printf("Failed to open the file.\n");  /* Print an error message if file couldn't be opened */
     }
 }
 
@@ -572,9 +632,12 @@ void closeExtFile(const char *filename)
 
     if (file != NULL)
     {
-        fclose(file);
+        fclose(file);  /* Close the file if it was successfully opened */
     }
+    /* If the file couldn't be opened, it might not need to be closed, so no error message is provided */
 }
+
+
 int is_valid_label(char *label)
 {
     int i;
@@ -626,25 +689,26 @@ void delAllFiles(const char *name)
 
     if ((amFile = fopen(am, "r")) != NULL)
     {
-        fclose(amFile);
-        remove(am);
+        fclose(amFile);  /* Close the file if it was successfully opened */
+        remove(am);     /* Delete the file */
     }
     if ((obFile = fopen(ob, "r")) != NULL)
     {
-        fclose(obFile);
-        remove(ob);
+        fclose(obFile);  /* Close the file if it was successfully opened */
+        remove(ob);     /* Delete the file */
     }
     if ((entFile = fopen(ent, "r")) != NULL)
     {
-        fclose(entFile);
-        remove(ent);
+        fclose(entFile); /* Close the file if it was successfully opened */
+        remove(ent);    /* Delete the file */
     }
     if ((extFile = fopen(ext, "r")) != NULL)
     {
-        fclose(extFile);
-        remove(ext);
+        fclose(extFile); /* Close the file if it was successfully opened */
+        remove(ext);    /* Delete the file */
     }
 }
+
 void delextFiles(const char *name)
 {
     char fileName[50];
@@ -659,10 +723,11 @@ void delextFiles(const char *name)
 
     if ((extFile = fopen(ext, "r")) != NULL)
     {
-        fclose(extFile);
-        remove(ext);
+        fclose(extFile); /* Close the file if it was successfully opened */
+        remove(ext);    /* Delete the file */
     }
 }
+
 void delentFiles(const char *name)
 {
     char fileName[50];
@@ -677,7 +742,8 @@ void delentFiles(const char *name)
 
     if ((entFile = fopen(ent, "r")) != NULL)
     {
-        fclose(entFile);
-        remove(ent);
+        fclose(entFile); /* Close the file if it was successfully opened */
+        remove(ent);    /* Delete the file */
     }
 }
+

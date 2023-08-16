@@ -1,3 +1,7 @@
+/*PreAssem.c
+Written by: Nadeem Kabha and Elad Eytan Feldman
+Date: 16/08/23
+Prepose: This header file declares functions and a structure used for preprocessing assembly source code. It defines the Macro structure to store macros and provides function prototypes for replacing tabs with spaces, saving macros, expanding macros, and running the preprocessing phase. */
 #ifndef PREASSEM_H
 #define PREASSEM_H
 
