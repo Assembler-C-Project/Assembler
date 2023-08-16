@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     FILE *WorkFile;
     char *FileName;
     int i;
-    
+
     /* Print a starting message */
     printf("Starting!\n");
 
@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
 
         /* Append ".am" to the file name for the working file */
         FileName = strcat(FileName, ".am");
-        
         /* Open the working file for writing */
         if ((WorkFile = fopen(FileName, "w")) == NULL)
         {
@@ -44,22 +43,14 @@ int main(int argc, char *argv[])
         /* Run the preprocessing assembly phase */
         RunPreAssem(SourceFile, WorkFile);
 
-        /* Close the working file after writing */
-        fclose(WorkFile);
-
         /* Reopen the working file for reading */
         if ((WorkFile = fopen(FileName, "r")) == NULL)
         {
             printf("Cannot open file %s\n", *argv);
             return 0;
         }
-
         /* Run the decoding phase */
         RunDecoder(WorkFile, FileName);
-        
-        /* Close the working file after reading */
-        fclose(WorkFile);
     }
-    
     return 0;
 }
