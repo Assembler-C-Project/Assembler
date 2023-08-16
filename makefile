@@ -15,7 +15,7 @@ INCDIR := include
 
 # Executable name
 EXECUTABLE := assembler
-
+RESULTS:= *.ext *.ent *.ob *.am
 .PHONY: all clean
 
 all: $(EXECUTABLE)
@@ -27,4 +27,4 @@ $(EXECUTABLE): $(OBJS)
 	$(CC) $(CFLAGS) -c -o $@ $< -I$(INCDIR)
 
 clean:
-	rm -f $(EXECUTABLE) $(OBJS)
+	rm -f $(EXECUTABLE) $(OBJS) $(RESULTS)
