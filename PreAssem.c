@@ -1,3 +1,7 @@
+/*PreAssem.c
+Written by: Nadeem Kabha and Elad Eytan Feldman
+Date: 16/08/23
+Prepose: This code defines functions to preprocess assembly source code by handling macros, replacing tabs with spaces, and expanding macros in the source file. It uses a macro table to store and manage macros, then writes the expanded source code to an output file. */
 #include "PreAssem.h"
 
 /* Function to replace tabs with spaces in a string */
