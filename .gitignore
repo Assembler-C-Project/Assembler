@@ -6,5 +6,6 @@
 /source_file.ob
 /assembler
 /*.o
-*.ext
 /*.ent
+/*.ob
+/*.ext

@@ -13,6 +13,27 @@ void replaceTabsWithSpaces(char *str)
     }
 }
 
+void removeSpaces(char *str) 
+{
+    int i, j = 1;
+    char result[MAX_LINE_LENGTH];
+    if(str[0] == ' ')
+    {
+        while (str[j] == ' ')
+        {
+            j++;
+        }
+    
+        for (i = 0; str[j]; i++, j++) 
+        {
+            result[i] = str[j];
+        }
+        
+        result[i] = '\0';
+        strcpy(str, result);
+    }
+}
+
 /* Function to save a macro in the macro table */
 void saveMacro(FILE *file, char *macroName, Macro *macroTable[], int *macroCount)
 {
@@ -28,7 +49,6 @@ void saveMacro(FILE *file, char *macroName, Macro *macroTable[], int *macroCount
     while (fgets(line, MAX_LINE_LENGTH, file) != NULL)
     {
         replaceTabsWithSpaces(line);
-
         /* If line is "endmcro", end of macro is reached */
         if (strncmp(line, " endmcro", 8) == 0)
         {
@@ -54,7 +74,7 @@ void unfoldMacros(FILE *sourceFile, FILE *outputFile, Macro *macroTable[], int *
     {
         replaceTabsWithSpaces(line);
 
-        /* If line starts with "mcro", save the macro */
+        /* If line starts with " mcro", save the macro */
         if (strncmp(line, " mcro", 5) == 0)
         {
             sscanf(line, "%*s %s", macroName);
@@ -71,6 +91,7 @@ void unfoldMacros(FILE *sourceFile, FILE *outputFile, Macro *macroTable[], int *
                 for (j = 0; j < macroTable[i]->lineCount; j++)
                 {
                     sprintf(expandedLine, "%s", macroTable[i]->lines[j]);
+                    removeSpaces(expandedLine);
                     fputs(expandedLine, outputFile);
                 }
                 break;
@@ -80,6 +101,7 @@ void unfoldMacros(FILE *sourceFile, FILE *outputFile, Macro *macroTable[], int *
         /* If the line did not contain a macro, write it to the output file as is */
         if (i == *macroCount)
         {
+            removeSpaces(line);
             fputs(line, outputFile);
         }
     }
