@@ -178,4 +178,7 @@ void RunDecoder(FILE *SourceFile, char *fileName) {
         }
         printf("Done!\n");
     }
+    else{
+        delAllFiles(ext_file);
+    }
 }
