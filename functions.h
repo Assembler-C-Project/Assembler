@@ -38,7 +38,9 @@ enum error_code {
     ERR_INV_LABEL,
     ERR_INV_CMD,
     ERR_INV_ENT,
-    ERR_VAR_NF
+    ERR_VAR_NF,
+    ERR_INV_REG,
+    ERR_INV_NUM
 };
 
 /* Define a structure for error types */
@@ -48,7 +50,7 @@ typedef struct ErrorType {
 } ErrorType;
 
 /* Declare an external array of error types */
-extern ErrorType error[9];
+extern ErrorType error[11];
 
 /* Define a structure for register types */
 typedef struct RegsType {
@@ -77,7 +79,7 @@ int is_valid_label(char *label);
 int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_word *label_lst);
 int search_data(char *operand, mem_word *label_lst);
 int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***base64Chars, mem_word *label_lst, char *filename);
-void convertToBase64(short decimalNumber, char *base64Chars);
+int convertToBase64(short decimalNumber, char *base64Chars);
 FILE *openEntFile(const char *name);
 void writeToEntFile(const char *filename, const char *line);
 void closeEntFile(const char *filename);

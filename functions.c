@@ -15,7 +15,9 @@ ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
                      {ERR_INV_LABEL, "Invalid label name\n"},
                      {ERR_INV_CMD, "Command/Instruction not found!\n"},
                      {ERR_INV_ENT, "Invalid entry name"},
-                     {ERR_VAR_NF, "Variable not found"}
+                     {ERR_VAR_NF, "Variable not found"},
+                     {ERR_INV_REG, "Invalid register number"},
+                     {ERR_INV_NUM, "The decimalNumber is not a 12 bits number.\n"}
 
 };
 
@@ -63,7 +65,11 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
         second_meth = caching_methods_values[2];
         second_value = caching_methods_values[3];
         num_of_ops = caching_methods_values[4];
-
+        err_msg = caching_methods_values[5];
+        if (err_msg != -1)
+        {
+            err_num++;
+        }
         /* Check for various errors based on the command and operands */
         if (!err_num && num_of_ops != 2 && ((command >= MOV && command <= SUB) || command == LEA))
         {
@@ -291,7 +297,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
     while (binaries[i] != END_OF_BIN)
     {
         (*base64Chars)[j] = (char *)malloc(3 * sizeof(char));
-        convertToBase64(binaries[i], (*base64Chars)[j]);
+        err_msg = convertToBase64(binaries[i], (*base64Chars)[j]);
         j++;
         i++;
     }
@@ -310,12 +316,12 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
     int first_value;
     int second_value;
     int num_of_ops;
-
+    int err_msg;
     /* Allocate memory to store the result */
-    result = malloc(sizeof(int) * 5);
+    result = malloc(sizeof(int) * 6);
     num_of_ops = 0;
     first_meth = second_meth = first_value = second_value = END_OF_BIN;
-
+    err_msg = -1;
     /* Divide the operands into first and second operands */
     *first_op = strtok(operands, ",");
     rest = strtok(NULL, " ");
@@ -329,7 +335,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
     /* Determine the caching methods and values for operands */
     first_meth = 0;
     second_meth = 0;
-    
+
     if (*first_op)
     {
         num_of_ops++;
@@ -339,17 +345,19 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
         if (!strncmp((*first_op), "@r", 2))
         {
             first_meth = DIRECT_REG_MAPPING;
-            for (i = 0; i < NUM_OF_REGS; i++)
+            i = 0;
+            while (i < NUM_OF_REGS)
             {
-                if (!strncmp((*first_op + 1), regs[i].reg_name, 2))
+                if (!strcmp((*first_op + 1), regs[i].reg_name))
                 {
                     first_value = regs[i].reg_num;
                     break;
                 }
+                i++;
             }
             if (i > NUM_OF_REGS - 1)
             {
-                printf("Err: Wrong register number\n");
+                err_msg = ERR_INV_REG;
             }
         }
         /* Check if the operand is an immediate value */
@@ -377,7 +385,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
             second_meth = DIRECT_REG_MAPPING;
             for (i = 0; i < NUM_OF_REGS; i++)
             {
-                if (!strncmp((*second_op + 1), regs[i].reg_name, 2))
+                if (!strcmp((*second_op + 1), regs[i].reg_name))
                 {
                     second_value = regs[i].reg_num;
                     break;
@@ -385,7 +393,7 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
             }
             if (i > NUM_OF_REGS - 1)
             {
-                printf("Err: Wrong register number\n");
+                err_msg = ERR_INV_REG;
             }
         }
         else if (!*err)
@@ -404,6 +412,8 @@ int *method_OpDivider(char *operands, char **first_op, char **second_op, mem_wor
     result[2] = second_meth;
     result[3] = second_value;
     result[4] = num_of_ops;
+    result[5] = err_msg;
+
     return result;
 }
 int *data_op_divider(char *operands)
@@ -427,7 +437,7 @@ int *data_op_divider(char *operands)
 
         /* Convert token to integer and store in the array */
         val_ptr[i] = strtol(token, &err, 10);
-        
+
         /* Check for parsing error */
         if (err)
         {
@@ -439,7 +449,7 @@ int *data_op_divider(char *operands)
             free(val_ptr);
             return NULL;
         }
-        
+
         token = strtok(NULL, ",");
     }
 
@@ -476,11 +486,10 @@ int *string_op_divider(char *operands)
 
         return val_ptr;
     }
-    
+
     /* Return NULL if the input string is not a valid enclosed string */
     return NULL;
 }
-
 
 int search_data(char *operand, mem_word *label_lst)
 {
@@ -506,27 +515,27 @@ int search_data(char *operand, mem_word *label_lst)
         }
         i++;
     }
-    
+
     /* Return -1 if the operand is not found in the label list */
     return -1;
 }
 
-
-void convertToBase64(short decimalNumber, char *base64Chars)
+int convertToBase64(short decimalNumber, char *base64Chars)
 {
+    int err_msg;
     char base64Map[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
+    err_msg = -1;
     /* Make sure the decimalNumber is 12 bits.*/
     if (decimalNumber < -2048 || decimalNumber > 4095)
     {
-        printf("The decimalNumber is not a 12 bits number.\n");
-        exit(1);
+        err_msg = ERR_INV_NUM;
     }
 
     /* Extract the first and second 6 bits and convert to corresponding base64 characters. */
     base64Chars[0] = base64Map[(decimalNumber & 0xFC0) >> 6];
     base64Chars[1] = base64Map[decimalNumber & 0x3F];
     base64Chars[2] = '\0';
+    return err_msg;
 }
 
 FILE *openEntFile(const char *name)
@@ -559,7 +568,6 @@ FILE *openEntFile(const char *name)
     return file;
 }
 
-
 void writeToEntFile(const char *filename, const char *line)
 {
     FILE *file = openEntFile(filename);
@@ -568,11 +576,11 @@ void writeToEntFile(const char *filename, const char *line)
     {
         /* Write the provided line to the file followed by a newline character */
         fprintf(file, "%s\n", line);
-        fclose(file);  /* Close the file after writing */
+        fclose(file); /* Close the file after writing */
     }
     else
     {
-        printf("Failed to open the file.\n");  /* Print an error message if file couldn't be opened */
+        printf("Failed to open the file.\n"); /* Print an error message if file couldn't be opened */
     }
 }
 
@@ -582,11 +590,10 @@ void closeEntFile(const char *filename)
 
     if (file != NULL)
     {
-        fclose(file);  /* Close the file if it was successfully opened */
+        fclose(file); /* Close the file if it was successfully opened */
     }
     /* If the file couldn't be opened, it might not need to be closed, so no error message is provided */
 }
-
 
 FILE *openExtFile(const char *name)
 {
@@ -618,11 +625,11 @@ void writeToExtFile(const char *filename, const char *line)
     {
         /* Write the provided line to the file followed by a newline character */
         fprintf(file, "%s\n", line);
-        fclose(file);  /* Close the file after writing */
+        fclose(file); /* Close the file after writing */
     }
     else
     {
-        printf("Failed to open the file.\n");  /* Print an error message if file couldn't be opened */
+        printf("Failed to open the file.\n"); /* Print an error message if file couldn't be opened */
     }
 }
 
@@ -632,11 +639,10 @@ void closeExtFile(const char *filename)
 
     if (file != NULL)
     {
-        fclose(file);  /* Close the file if it was successfully opened */
+        fclose(file); /* Close the file if it was successfully opened */
     }
     /* If the file couldn't be opened, it might not need to be closed, so no error message is provided */
 }
-
 
 int is_valid_label(char *label)
 {
@@ -689,23 +695,23 @@ void delAllFiles(const char *name)
 
     if ((amFile = fopen(am, "r")) != NULL)
     {
-        fclose(amFile);  /* Close the file if it was successfully opened */
+        fclose(amFile); /* Close the file if it was successfully opened */
         remove(am);     /* Delete the file */
     }
     if ((obFile = fopen(ob, "r")) != NULL)
     {
-        fclose(obFile);  /* Close the file if it was successfully opened */
+        fclose(obFile); /* Close the file if it was successfully opened */
         remove(ob);     /* Delete the file */
     }
     if ((entFile = fopen(ent, "r")) != NULL)
     {
         fclose(entFile); /* Close the file if it was successfully opened */
-        remove(ent);    /* Delete the file */
+        remove(ent);     /* Delete the file */
     }
     if ((extFile = fopen(ext, "r")) != NULL)
     {
         fclose(extFile); /* Close the file if it was successfully opened */
-        remove(ext);    /* Delete the file */
+        remove(ext);     /* Delete the file */
     }
 }
 
@@ -724,7 +730,7 @@ void delextFiles(const char *name)
     if ((extFile = fopen(ext, "r")) != NULL)
     {
         fclose(extFile); /* Close the file if it was successfully opened */
-        remove(ext);    /* Delete the file */
+        remove(ext);     /* Delete the file */
     }
 }
 
@@ -743,7 +749,6 @@ void delentFiles(const char *name)
     if ((entFile = fopen(ent, "r")) != NULL)
     {
         fclose(entFile); /* Close the file if it was successfully opened */
-        remove(ent);    /* Delete the file */
+        remove(ent);     /* Delete the file */
     }
 }
-
