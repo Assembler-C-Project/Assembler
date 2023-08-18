@@ -8,7 +8,7 @@ Prepose: define various utility functions and data structures used in an assembl
 
 /* Error messages for different issues */
 ErrorType error[] = {{ERR_2_OPS, "Expected 2 operands\n"},
-                     {ERR_1_OP, "Expected 1 operand\n"},
+                     {ERR_1_OP, "Expected 1 valid operand\n"},
                      {ERR_0_OP, "Command doesn't take operands\n"},
                      {ERR_DEST_TYPE, "Destination operand type error\n"},
                      {ERR_SRC_TYPE, "Source operand type error\n"},
@@ -212,7 +212,7 @@ int functions(int command, char *operands, int *curr_IC, int *curr_DC, char ***b
                     }
                     if (second_value == 0 && second_meth == DIRECT_MAPPING)
                     {
-                        sprintf(ext_line, "%s %d", second_op, 101 + *curr_DC + DC + *curr_IC + DC);
+                        sprintf(ext_line, "%s %d", second_op, 100 + num_of_ops + *curr_DC + DC + *curr_IC + DC);
                     }
                     writeToExtFile(filename, ext_line);
                 }
@@ -422,7 +422,7 @@ int *data_op_divider(char *operands)
     int i;
     char *token, *err;
     char curr_ops[100];
-
+    err = NULL;
     /* Allocate memory for the integer values array */
     val_ptr = (int *)malloc(1 * sizeof(int));
     strcpy(curr_ops, operands);
@@ -439,7 +439,7 @@ int *data_op_divider(char *operands)
         val_ptr[i] = strtol(token, &err, 10);
 
         /* Check for parsing error */
-        if (err)
+        if (!*err)
         {
             i++;
         }
